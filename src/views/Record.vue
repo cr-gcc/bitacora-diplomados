@@ -1,7 +1,9 @@
 <template>
   <div v-if="diploma">
-    <h2 :class="diploma.color">{{ diploma.title }}</h2>
-    <!-- Aquí más detalles si quieres -->
+    <!--
+      <h2 :class="diploma.color">{{ diploma.title }}</h2>
+      <p>ID del diplomado: {{ diploma.id }}</p>
+    -->
   </div>
   <div v-else>
     <p>Diploma no encontrado.</p>
@@ -26,8 +28,9 @@
 
     if (diploma.value) {
       pageStore.setTitleAndColor(diploma.value.title, diploma.value.color);
-    } else {
-      pageStore.setTitleAndColor('Diploma no encontrado', 'text-red-500');
+    } 
+    else {
+      pageStore.setTitleAndColor('Diplomado no encontrado', 'text-red-700');
     }
   });
 </script>

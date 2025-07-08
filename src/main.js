@@ -11,11 +11,12 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 
-const pageStore = usePageTitleStore();
-
+// Usa el hook después de que la app ya tenga Pinia y router
 router.afterEach((to) => {
-  if (to.meta.title) {
-    pageStore.setTitle(to.meta.title);
+  const pageStore = usePageTitleStore();
+  // Si la ruta tiene título y color, los actualizamos en el store
+  if (to.meta.title && to.meta.color) {
+    pageStore.setTitleAndColor(to.meta.title, to.meta.color);
   }
 });
 

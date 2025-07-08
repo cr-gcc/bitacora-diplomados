@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4 bg-gray-300">
-    <h2 class="text-4xl px-6 py-4" :class="colorTitle">{{ pageTitle  }}</h2>
+    <h2 class="text-4xl px-6 py-4 font-semibold" :class="colorTitle">{{ pageTitle  }}</h2>
   </div>
 </template>
 <script setup>
