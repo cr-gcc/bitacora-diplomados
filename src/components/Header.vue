@@ -16,7 +16,7 @@
                   class="text-gray-300 transition hover:text-white"
                   href="#"
                 >
-                  Projects
+                  Profesores
                 </a>
               </li>
               <li>
@@ -24,7 +24,7 @@
                   class="text-gray-300 transition hover:text-white"
                   href="#"
                 >
-                  Blog
+                  Estadísticas
                 </a>
               </li>
             </ul>
