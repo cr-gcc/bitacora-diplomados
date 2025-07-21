@@ -3,10 +3,14 @@ import './style.css';
 import App from './App.vue';
 import { createPinia } from 'pinia';
 import router from './router';
+import api from './plugins/axios';
 import { usePageTitleStore } from '@/stores/usePageTitleStore';
 
 const app = createApp(App);
 const pinia = createPinia();
+
+// disponible como this.$api en components
+app.config.globalProperties.$api = api;
 
 app.use(pinia);
 app.use(router);

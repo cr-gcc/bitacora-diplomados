@@ -11,7 +11,6 @@
             </div>
           </div>
           <div class="mt-8">
-            <form>
               <div class="mb-4">
                 <label for="user" class="block text-md text-yellow-600 mb-2">Usuario</label>
                 <input v-model="user" type="text" name="user" id="user" class="block w-full px-4 py-2 text-gray-900 border rounded-lg bg-gray-200 border-yellow-400  focus:border-yellow-600 focus:ring-yellow-600 focus:outline-none focus:ring focus:ring-opacity-40" />
@@ -25,7 +24,7 @@
                   Iniciar sesión
                 </button>
               </div>
-            </form>
+             <p v-if="error" class="text-red-500 mt-4">{{ error }}</p>
           </div>
         </div>
       </div>
@@ -35,21 +34,39 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
+  import api from '@/plugins/axios';
 
-  const principalImage = 'https://srisriuniversity.edu.in/wp-content/uploads/2022/08/Faculty-of-Management-Studies-scaled-e1661238593149-1536x864.jpg';
+  const principalImage = '/assets/images/wallpapers/fondo.jpg';
   const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 
   const router = useRouter();
   const user = ref('');
   const password = ref('');
+  const error = ref('');
 
-  const login = () => {
-    // Aquí iría la validación real
+  const login = async () => {
+    error.value = '';
     if (user.value && password.value) {
-      router.push('/');
-    } 
+      try {
+        pb.value = true;
+        const res = await api.post('/auth/login', {
+          email: user.value,
+          password: password.value
+        });
+        auth.setToken(res.data.token);
+        auth.setUser(res.data.user);
+        //localStorage.setItem('token', token);
+        router.push('/')
+      } 
+      catch (e) {
+        error.value = e.response?.data?.message || 'Error al iniciar sesión';
+      }
+      finally {
+        pb.value = false;
+      }
+    }
     else {
-      alert('Completa los campos.');
+      error.value = "Completa los campos correctamente.";
     }
   };
 </script>

@@ -8,12 +8,20 @@ const routes = [
   {
     path: '/login',
     component: Login,
-    meta: { layout: 'none' }
+    meta: { 
+      layout: 'none',
+      requiresAuth: false 
+    }
   },
   {
     path: '/',
     component: Home,
-    meta: { title: 'Diplomados', color: 'text-slate-900' }
+    meta: { 
+      title: 'Diplomados', 
+      color: 'text-slate-900',
+      requiresAuth: true 
+
+    }
   },
   {
     path: '/:slug',
@@ -28,4 +36,21 @@ const router = createRouter({
   routes,
 });
 
+router.beforeEach((to, from, next) => {
+  //   Dato del usuario API
+  const auth = JSON.parse(localStorage.getItem('auth'));
+  const isAuthenticated = !!localStorage.getItem('token');
+  const userRoles = auth?.user?.roles || [];
+  //  Autenticacion requerida y no esta autenticado
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/login');
+  }
+  else if ( (to.path === '/login' && isAuthenticated) || to.path === '/') {
+    
+  }
+  else {
+    next();
+  }
+  
+});
 export default router;
