@@ -34,9 +34,9 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import api from '@/plugins/axios';
-
-  const principalImage = '/assets/images/wallpapers/fondo.jpg';
+  //import api from '@/plugins/axios';
+  
+  const principalImage = 'assets/images/wallpapers/fondo.jpg';
   const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 
   const router = useRouter();
@@ -47,23 +47,7 @@
   const login = async () => {
     error.value = '';
     if (user.value && password.value) {
-      try {
-        pb.value = true;
-        const res = await api.post('/auth/login', {
-          email: user.value,
-          password: password.value
-        });
-        auth.setToken(res.data.token);
-        auth.setUser(res.data.user);
-        //localStorage.setItem('token', token);
-        router.push('/')
-      } 
-      catch (e) {
-        error.value = e.response?.data?.message || 'Error al iniciar sesión';
-      }
-      finally {
-        pb.value = false;
-      }
+      router.push('/');
     }
     else {
       error.value = "Completa los campos correctamente.";

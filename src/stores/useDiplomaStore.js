@@ -10,7 +10,7 @@ export const useDiplomaStore = defineStore('diplomas', () => {
       borderColor: 'border-pink-950',
       color: 'bg-pink-950',
       icon: 'fa-solid fa-users',
-      url: 'https://diplomados.fca.unam.mx/auditoria/',
+      url: import.meta.env.VITE_AI_URL,
       localUrl: '/auditoria-intena'
     },
     {
@@ -20,7 +20,7 @@ export const useDiplomaStore = defineStore('diplomas', () => {
       borderColor: 'border-blue-600',
       color: 'bg-blue-600',
       icon: 'fa-solid fa-cart-shopping',
-      url: 'https://diplomados.fca.unam.mx/comercio_electronico/',
+      url: import.meta.env.VITE_CE_URL,
       localUrl: '/comercio-electronico'
     },
     {
@@ -30,7 +30,7 @@ export const useDiplomaStore = defineStore('diplomas', () => {
       borderColor: 'border-yellow-900',
       color: 'bg-yellow-900',
       icon: 'fa-solid fa-money-bill-1-wave',
-      url: 'https://diplomados.fca.unam.mx/finanzas/',
+      url: import.meta.env.VITE_FI_URL,
       localUrl: '/finanzas'
     },
     {
@@ -40,7 +40,7 @@ export const useDiplomaStore = defineStore('diplomas', () => {
       borderColor: 'border-yellow-600',
       color: 'bg-yellow-600',
       icon: 'fa-solid fa-volume-high',
-      url: 'https://diplomados.fca.unam.mx/mercadotecnia/',
+      url: import.meta.env.VITE_ME_URL,
       localUrl: '/mercadotecnia'
     },
     {
@@ -50,7 +50,7 @@ export const useDiplomaStore = defineStore('diplomas', () => {
       borderColor: 'border-lime-900',
       color: 'bg-lime-900',
       icon: 'fa-solid fa-person',
-      url: 'https://diplomados.fca.unam.mx/talento_humano/',
+      url: import.meta.env.VITE_TH_URL,
       localUrl: '/talento-humano'
     },
     {

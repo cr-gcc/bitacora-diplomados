@@ -19,7 +19,7 @@ const routes = [
     meta: { 
       title: 'Diplomados', 
       color: 'text-slate-900',
-      requiresAuth: true 
+      requiresAuth: false 
 
     }
   },
@@ -32,7 +32,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/cedigec/bitacora-diplomados/'),
   routes,
 });
 
@@ -45,12 +45,11 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login');
   }
-  else if ( (to.path === '/login' && isAuthenticated) || to.path === '/') {
-    
+  else if ( (to.path === '/login' && isAuthenticated)) {
+    next('/');
   }
   else {
     next();
   }
-  
 });
 export default router;
