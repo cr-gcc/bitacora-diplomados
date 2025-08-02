@@ -25,6 +25,9 @@
                 </button>
               </div>
              <p v-if="error" class="text-red-500 mt-4">{{ error }}</p>
+             <div v-if="pb" class="mt-2">
+              <PB/>  
+            </div>
           </div>
         </div>
       </div>
@@ -34,12 +37,16 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  //import api from '@/plugins/axios';
+  import { useAuthStore } from '@/stores/useAuthStore';
+  import PB from '@/components/ProgressBar.vue';
+  import api from '@/plugins/axios';
   
   const principalImage = 'assets/images/wallpapers/fondo.jpg';
   const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 
   const router = useRouter();
+  const auth = useAuthStore();
+  const pb = ref(false);
   const user = ref('');
   const password = ref('');
   const error = ref('');
@@ -47,7 +54,22 @@
   const login = async () => {
     error.value = '';
     if (user.value && password.value) {
-      router.push('/');
+      try {
+        pb.value = true;
+        const res = await api.post('/login', {
+          email: user.value,
+          password: password.value
+        });
+        auth.setToken(res.data.access_token);
+        auth.setUser(res.data.user);
+        router.push('/')
+      } 
+      catch (e) {
+        error.value = e.response?.data?.message || 'Error al iniciar sesión';
+      }
+      finally {
+        pb.value = false;
+      }
     }
     else {
       error.value = "Completa los campos correctamente.";

@@ -38,8 +38,8 @@
             >
               <span class="sr-only">Toggle dashboard menu</span>
               <img
-                src="https://ui-avatars.com/api/?name=cris"
-                alt=""
+               :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user?.name || 'Usuario')}`"
+                alt="Usuario"
                 class="size-10 object-cover"
               />
             </button>
@@ -50,16 +50,18 @@
               role="menu"
             >
               <div class="p-2">
-                <a
-                  href="#"
-                  class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                  role="menuitem"
-                >
-                  Perfil
-                </a>
-                <form method="POST" action="#">
+                <div>
+                  <a
+                    href="#"
+                    class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                    role="menuitem"
+                  >
+                    Perfil
+                  </a>  
+                </div>
+                <div>
                   <button
-                    @click="closeUserMenu()"
+                    @click="logout()"
                     type="submit"
                     class="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-600/20 hover:text-red-300"
                     role="menuitem"
@@ -80,7 +82,7 @@
                     </svg>
                     Logout
                   </button>
-                </form>
+                </div>
               </div>
             </div>
           </div>
@@ -126,8 +128,13 @@
 </template>
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
-
+  import { useRouter } from 'vue-router';
+  import { useAuthStore } from '@/stores/useAuthStore';
+  import api from '@/plugins/axios';
+  
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
+  const auth = useAuthStore();
+  const router = useRouter();
   const userMenu = ref(false);
   const userMenuRef = ref(null);
   const mobileUserMenu = ref(false);
@@ -166,4 +173,18 @@
     document.removeEventListener('click', handleClickOutside);
   });
 
+  const logout = async () => {
+    try {
+      ///isLoadingSS.value = true;
+      await api.post('/logout');
+    } 
+    catch (error) {
+      console.warn('Error al hacer logout en API', error);
+    } 
+    finally {
+      //isLoadingSS.value = false;
+      auth.logout();
+      router.push('/login');
+    }
+  }
 </script>
