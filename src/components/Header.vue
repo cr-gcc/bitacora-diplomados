@@ -27,6 +27,14 @@
                   Estadísticas
                 </a>
               </li>
+              <li>
+                <a
+                  class="text-gray-300 transition hover:text-white"
+                  href="#"
+                >
+                  Usuarios
+                </a>
+              </li>
             </ul>
           </nav>
           <!-- Avatar y menú -->
@@ -34,7 +42,7 @@
             <button
               @click="toggleUserMenu()"
               type="button"
-              class="overflow-hidden rounded-full border border-gray-500 shadow-inner"
+              class="cursor-pointer overflow-hidden rounded-full border border-gray-500 shadow-inner"
             >
               <span class="sr-only">Toggle dashboard menu</span>
               <img
@@ -62,8 +70,7 @@
                 <div>
                   <button
                     @click="logout()"
-                    type="submit"
-                    class="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-600/20 hover:text-red-300"
+                    class="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-600/20 hover:text-red-300 cursor-pointer"
                     role="menuitem"
                   >
                     <svg
@@ -125,6 +132,7 @@
       </div>
     </div>
   </header>
+  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
@@ -135,10 +143,12 @@
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
   const auth = useAuthStore();
   const router = useRouter();
+  const loading = ref(false);
   const userMenu = ref(false);
   const userMenuRef = ref(null);
   const mobileUserMenu = ref(false);
   const mobileUserMenuRef = ref(null);
+
 
   const toggleUserMenu = () => {
     userMenu.value = !userMenu.value;
@@ -175,14 +185,14 @@
 
   const logout = async () => {
     try {
-      ///isLoadingSS.value = true;
+      loading.value = true;
       await api.post('/logout');
     } 
     catch (error) {
       console.warn('Error al hacer logout en API', error);
     } 
     finally {
-      //isLoadingSS.value = false;
+      loading.value = false;
       auth.logout();
       router.push('/login');
     }
