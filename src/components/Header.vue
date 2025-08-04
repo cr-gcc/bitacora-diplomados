@@ -12,12 +12,10 @@
           <nav aria-label="Global" class="hidden md:block">
             <ul class="flex items-center gap-6 text-md">
               <li>
-                <a
-                  class="text-gray-300 transition hover:text-white"
-                  href="#"
+                <RouterLink :to="'/profesores'" class="text-gray-300 transition hover:text-white"
                 >
                   Profesores
-                </a>
+                </RouterLink>
               </li>
               <li>
                 <a
