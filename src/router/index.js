@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "@/views/Login.vue";
 import Home from "@/views/Home.vue";
-import Record from "@/views/Record.vue";
-import About from "@/views/About.vue";
+import Certificate from "@/views/Certificate.vue";
+//import Professors from "@/views/About.vue";
+import Professors from "@/views/Professors.vue";
 
 const routes = [
   {
@@ -17,18 +18,23 @@ const routes = [
     path: "/",
     component: Home,
     meta: {
-      title: "Diplomados",
-      color: "text-slate-900",
       requiresAuth: true,
     },
   },
   {
     path: "/:slug",
-    component: Record,
-    meta: { title: "Cargando...", color: "text-slate-900" }, // título provisional
-    requiresAuth: true,
+    component: Certificate,
+    meta: {
+      requiresAuth: true,
+    },
   },
-  { path: "/about", component: About },
+  {
+    path: "/profesores",
+    component: Professors,
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({
