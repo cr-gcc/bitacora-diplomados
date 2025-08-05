@@ -5,6 +5,10 @@
 .bcb-certificate {
   @apply inline-block w-full rounded-sm border px-12 py-1 text-base text-white focus:ring-2 focus:outline-none cursor-pointer;
 }
+/*Base color button small*/
+.bcb-auto{
+  @apply w-auto rounded-sm border px-12 py-1 text-sm text-white focus:ring-2 focus:outline-none cursor-pointer;
+}
 
 body {
   font-family: 'Roboto Condensed', sans-serif;
