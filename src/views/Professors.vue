@@ -25,7 +25,7 @@
       </button>
     </div>
     <div>
-      <button class="bcb-certificate border-sky-900 bg-sky-900">
+      <button class="bcb-certificate border-sky-900 bg-sky-900" @click="addProfessor()">
         Agregar
       </button>
     </div>
@@ -60,8 +60,8 @@
             <td class="px-1">{{ prof.password }}</td>
             <td class="px-1">
               <button class="bcb-auto bg-sky-900" @click="getProfessorInArray(prof.id)">
-                <i class="fa-solid fa-pen mr-1"></i>
-                Editar
+                <i class="fa-solid fa-address-card mr-1"></i>
+                Ver registro
               </button>
             </td>
           </tr> 
@@ -70,10 +70,107 @@
     </div>
   </div>
   <SplashScreen :isLoadingSS="loading" />
+  <ModalOptions v-model="isModalOpen" title="Profesor">
+
+    <div v-if="professorFlag==1" class="grid-max-3 gap-4">
+      <div>
+        <span class="whitespace-nowrap">Nombre</span>
+        <input v-model="professor.name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Apellidos</span>
+        <input v-model="professor.last_name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Email</span>
+        <input v-model="professor.email" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">RFC</span>
+        <input v-model="professor.rfc" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Usuario</span>
+        <input v-model="professor.user" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Contraseña</span>
+        <input v-model="professor.password" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Estatus</span>
+        <select
+          v-model="professor.active"
+          name="status"
+          class="base-input-gray"
+        >
+          <option value="" disabled>Seleccione un estatus</option>
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div v-else class="grid-max-3 gap-4">
+      <div>
+        <span class="whitespace-nowrap">Nombre</span>
+        <input v-model="form.name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Apellidos</span>
+        <input v-model="form.last_name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Email</span>
+        <input v-model="form.email" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">RFC</span>
+        <input v-model="form.rfc" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Usuario</span>
+        <input v-model="form.user" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Contraseña</span>
+        <input v-model="form.password" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Estatus</span>
+        <select
+          v-model="form.active"
+          name="status"
+          class="base-input-gray"
+        >
+          <option value="" disabled>Seleccione un estatus</option>
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="confirmarAccion" 
+        class="bcb-modal bg-sky-800">
+        {{ professorFlag==0 ? 'Guardar' : 'Editar' }}
+      </button>
+      <button 
+        @click="isModalOpen = false" 
+        class="bcb-modal bg-sky-800">
+        Salir
+      </button>
+    </div>
+    <div v-if="progressBar" class="mt-2">
+      <ProgressBar/>
+    </div>
+  </ModalOptions>
 </template>
 <script setup>
   import { ref } from 'vue'; 
   import { useTitleStore } from '@/stores/useTitleStore';
+  import ModalOptions from '@/components/ModalOptions.vue';
+  import ProgressBar from '@/components/ProgressBar.vue';
   import axios from 'axios';
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -81,9 +178,22 @@
   const url = `${apiBaseUrl}${endpoint}`;
   const titleStore = useTitleStore();
   const loading = ref(false);
+  const isModalOpen = ref(false);
+  const progressBar = ref(false);
   const error = ref(null);
+  const professorFlag = ref(0);
   const professors = ref([]);
-  const professor = ref(null);
+  const professor = ref();
+  const form = ref({
+    'name':'',
+    'last_name':'',
+    'email':'',
+    'rfc':'',
+    'user':'',
+    'password':'',
+    'active':'',
+  });
+
   titleStore.setColorTitle('Profesores', 'sky-900');
 
   const getAllProfessors = async () => {
@@ -105,13 +215,16 @@
 
   const getProfessorInArray = async (id) => {
     professor.value = null;
+    professorFlag.value = 1;
     let selectedProfessor = professors.value.find(p => p.id === id);
     if (selectedProfessor) {
-      professor.value = selectedProfessor; // Lo asignas directamente
+      professor.value = selectedProfessor;
+      isModalOpen.value = true;
     } 
     else {
       getProfessor(id);
     }
+
   };
 
   const getProfessor = async (id) => {
@@ -131,5 +244,13 @@
     }
   };
 
+  const addProfessor = () => {
+    professorFlag.value = 0;
+    isModalOpen.value = true;
+  }
+  /*
+  const sendProfessor = async () = {
 
+  }
+  */
 </script>
