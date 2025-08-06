@@ -1,14 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
+.grid-max-3 {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3;
+}
 /*Base color button certificate*/
 .bcb-certificate {
   @apply inline-block w-full rounded-sm border px-12 py-1 text-base text-white focus:ring-2 focus:outline-none cursor-pointer;
 }
 /*Base color button small*/
-.bcb-auto{
+.bcb-auto {
   @apply w-auto rounded-sm border px-12 py-1 text-sm text-white focus:ring-2 focus:outline-none cursor-pointer;
 }
+
+.bcb-modal{
+  @apply w-auto rounded-sm border px-4 py-1 text-sm text-white focus:ring-2 focus:outline-none cursor-pointer;
+}
+
+.base-input-gray {
+  @apply w-full px-2 text-black bg-gray-200 border-2 border-gray-200 focus:border-gray-400 focus:outline-none;
+}
+
 
 body {
   font-family: 'Roboto Condensed', sans-serif;
