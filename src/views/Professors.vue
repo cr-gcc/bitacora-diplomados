@@ -1,31 +1,39 @@
 <template>
-  {{ professor }}
-  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+  <div class="grid-max-5 gap-4 mb-4">
     <div>
       <input
-        type="number"
-        id="grupo"
+        type="text"
         placeholder="Buscar"
         class="w-full rounded px-2 py-1 border border-sky-900"
+        v-model="info"
+        @keyup.enter="searchProfessor()"
       />
     </div>
     <div>
-      <button class="bcb-certificate border-sky-900 bg-sky-900">
+      <button 
+        @click="getProfessorsByStatus(0)"
+        class="bcb-certificate border-sky-900 bg-sky-900">
         Inactivos
       </button>
     </div>
     <div>
-      <button class="bcb-certificate border-sky-900 bg-sky-900">
+      <button
+        @click="getProfessorsByStatus(1)" 
+        class="bcb-certificate border-sky-900 bg-sky-900">
         Activos
       </button>
     </div>
     <div>
-      <button class="bcb-certificate border-sky-900 bg-sky-900" @click="getAllProfessors()">
+      <button
+        @click="getAllProfessors()" 
+        class="bcb-certificate border-sky-900 bg-sky-900">
         Todos
       </button>
     </div>
     <div>
-      <button class="bcb-certificate border-sky-900 bg-sky-900" @click="addProfessor()">
+      <button
+        @click="addProfessor()" 
+        class="bcb-certificate border-sky-900 bg-sky-900">
         Agregar
       </button>
     </div>
@@ -71,7 +79,6 @@
   </div>
   <SplashScreen :isLoadingSS="loading" />
   <ModalOptions v-model="isModalOpen" title="Profesor">
-
     <div v-if="professorFlag==1" class="grid-max-3 gap-4">
       <div>
         <span class="whitespace-nowrap">Nombre</span>
@@ -148,17 +155,22 @@
         </select>
       </div>
     </div>
-
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
+    <div v-if="success" class="mt-2 mb-1">
+      <p class="text-lime-700">{{ success }}</p>
+    </div>
     <div class="flex justify-end gap-1">
       <button 
-        @click="confirmarAccion" 
+        @click="sendProfessor()" 
         class="bcb-modal bg-sky-800">
         {{ professorFlag==0 ? 'Guardar' : 'Editar' }}
       </button>
       <button 
-        @click="isModalOpen = false" 
+        @click="closeProfessor()"
         class="bcb-modal bg-sky-800">
-        Salir
+        Aceptar
       </button>
     </div>
     <div v-if="progressBar" class="mt-2">
@@ -181,9 +193,11 @@
   const isModalOpen = ref(false);
   const progressBar = ref(false);
   const error = ref(null);
+  const success  = ref(null);
   const professorFlag = ref(0);
   const professors = ref([]);
   const professor = ref();
+  const info = ref("");
   const form = ref({
     'name':'',
     'last_name':'',
@@ -197,6 +211,7 @@
   titleStore.setColorTitle('Profesores', 'sky-900');
 
   const getAllProfessors = async () => {
+    professors.value = [];
     loading.value = true;
     error.value = null;
     try {
@@ -207,7 +222,7 @@
       });
       professors.value = response.data; 
     } catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar los certificados';
+      error.value = e.response?.data?.message || 'Error al cargar los profesores';
     } finally {
       loading.value = false;
     }
@@ -238,19 +253,86 @@
       });
       professor.value = response.data; 
     } catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar los certificados';
+      error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
       loading.value = false;
     }
   };
 
+  const getProfessorsByStatus = async (status) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await axios.get(`${url}/by-status/${status}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      professors.value = response.data; 
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error consultar el profesor';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const closeProfessor = () => {
+    isModalOpen.value = false;
+    professor.value = null;
+    error.value = null;
+    success.value = null;
+  }
+
   const addProfessor = () => {
     professorFlag.value = 0;
     isModalOpen.value = true;
-  }
-  /*
-  const sendProfessor = async () = {
+  };
 
-  }
-  */
+  const sendProfessor = async () => {
+    loading.value = true;
+    error.value = null;
+    success.value = null;
+    const method = professorFlag.value === 0 ? 'post' : 'put';
+    const body = professorFlag.value === 0 ? form.value : professor.value;
+    const finalUrl = professorFlag.value === 0 ? url : `${url}/${professor.value.id}`;
+    try {
+      const response = await axios[method](finalUrl, body, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status == 200) {
+        success.value = response.data.message+". Por favor consulte los profesores para verificar los cambios.";
+      }
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar los certificados';
+    } 
+    finally {
+      loading.value = false;    
+    }
+  };
+
+  const searchProfessor = async () => {
+    loading.value = true;
+    const finalUrl = ref(`${url}/search`);
+    const body = ref({info:info.value});
+    try {
+      const response = await axios.post(finalUrl.value, body.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      professors.value = response.data; 
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al buscar profesores';
+    } 
+    finally {
+      loading.value = false;    
+    }
+  };
+
 </script>
