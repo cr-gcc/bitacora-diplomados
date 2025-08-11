@@ -17,6 +17,10 @@
 .bcb-auto {
   @apply w-auto rounded-sm border px-12 py-1 text-sm text-white focus:ring-2 focus:outline-none cursor-pointer;
 }
+/*Button option mini*/
+.bo-mini{
+  @apply cursor-pointer flex items-center gap-1 px-2 py-1 text-xs text-white rounded;
+}
 
 .bcb-modal{
   @apply w-auto rounded-sm border px-4 py-1 text-sm text-white focus:ring-2 focus:outline-none cursor-pointer;
