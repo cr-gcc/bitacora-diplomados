@@ -173,16 +173,12 @@
         Aceptar
       </button>
     </div>
-    <div v-if="progressBar" class="mt-2">
-      <ProgressBar/>
-    </div>
   </ModalOptions>
 </template>
 <script setup>
   import { ref } from 'vue'; 
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
-  import ProgressBar from '@/components/ProgressBar.vue';
   import axios from 'axios';
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -191,7 +187,6 @@
   const titleStore = useTitleStore();
   const loading = ref(false);
   const isModalOpen = ref(false);
-  const progressBar = ref(false);
   const error = ref(null);
   const success  = ref(null);
   const professorFlag = ref(0);
