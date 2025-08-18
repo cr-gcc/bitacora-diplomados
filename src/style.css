@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
+.grid-max-2 {
+  @apply grid grid-cols-1 sm:grid-cols-2;
+}
+
 .grid-max-3 {
   @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3;
 }

@@ -4,12 +4,12 @@
     <div class="grid-max-5 gap-4 mb-4">
       <div>
         <input
-          type="text"
+          type="number"
           placeholder="Buscar"
           class="w-full rounded px-2 py-1 text-md border"
           :class="'border-'+certificate.color"
           v-model="info"
-          @keyup.enter="searchCourse()"
+          @keyup.enter="searchGroup()"
         />
       </div>
       <div>
@@ -38,12 +38,15 @@
       </div>
       <div>
         <button 
-          @click="openModalCourse(0)"
+          @click="openModalCourseAdd()"
           class="bcb-certificate" 
           :class="['border-'+certificate.color, 'bg-'+certificate.color]">
           Agregar
         </button>
       </div>
+    </div>
+    <div v-if="errorSearch">
+      <p class="text-red-700">{{ errorSearch }}</p>
     </div>
     <div v-if="groups.length>0" class="space-y-4">
       <details v-for="group in groups" :key="'indg'+group.id" class="group [&_summary::-webkit-details-marker]:hidden">
@@ -89,13 +92,27 @@
                 <td class="py-1">{{ course.end_date }}</td>
                 <td class="py-1">{{ course.module.id }}</td>
                 <td class="py-1">{{ course.module.name }}</td>
-                <td class="py-1">{{ course.professor_id }}</td>
+                <td class="py-1">
+                  {{ 
+                    course.professor ? 
+                    course.professor.name+"  "+course.professor.last_name : 
+                    "" 
+                  }}  
+                </td>
                 <td class="py-1">
                   <button 
+                    @click="openModalCourseEdit(course.id)"
+                    class="bo-mini mb-1"
+                    :class="['bg-'+certificate.color]">
+                    <i class="fa-solid fa-pen mr-0.5"></i>
+                    Editar
+                  </button>
+                  <button 
+                    @click="openModalCourseEdit(course.id)"
                     class="bo-mini"
                     :class="['bg-'+certificate.color]">
-                    <i class="fa-solid fa-pen"></i>
-                    Editar
+                    <i class="fa-solid fa-clipboard-check mr-0.5"></i>
+                    Revisión
                   </button>
                 </td>
               </tr>
@@ -104,6 +121,7 @@
         </div>
       </details>
     </div>
+    {{ course }}
   </div>
   <div v-else>
     <p>{{ error }}</p>
@@ -135,56 +153,37 @@
       </button>
     </div>
   </ModalOptions>
-  <!--
-  <ModalOptions v-model="modalCourse" title="Cursos">
-    <div class="grid-max-3 gap-4 mb-2">
+  <ModalOptions v-model="modalEditCourse" title="Editar Cursos">
+    <div class="grid-max-2 gap-4 mb-2">
+      <div>
+        <span class="whitespace-nowrap">Fecha de Inicio</span>
+        <input v-model="course.start_date" type="date" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Fecha de Termino</span>
+        <input v-model="course.end_date" type="date" class="base-input-gray"/>
+      </div>
       <div>
         <span class="whitespace-nowrap">Profesor</span>
         <select
-          :disabled="courseFlag == 0"
-          v-model="form.professor_id"
+          v-model="course.professor_id"
           class="base-input-gray"
         >
-          <option value="" disabled>Seleccione un profesor</option>
+          <option value="null" disabled>Seleccione un profesor</option>
           <option v-for="professor in professors" :value="professor.id" :key="'ind_'+professor.id">
             {{ professor.name }} {{ professor.last_name }}
           </option>
         </select>
       </div>
       <div>
-        <span class="whitespace-nowrap">Módulo</span>
-        <select
-          :disabled="courseFlag == 0"
-          v-model="form.module_id"
-          class="base-input-gray"
-        >
-          <option value="" disabled>Seleccione un módulo</option>
-          <option v-for="module in modules" :value="module.id" :key="'ind'+module.id">
-            {{ module.number }} - {{ module.name }}
-          </option>
-        </select>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Grupo</span>
-        <input v-model="form.group" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Fecha de Inicio</span>
-        <input v-model="form.start_date" type="date" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Fecha de Termino</span>
-        <input v-model="form.end_date" type="date" class="base-input-gray"/>
-      </div>
-      <div>
         <span class="whitespace-nowrap">Estatus</span>
         <select
-          v-model="form.status"
+          v-model="course.status"
           class="base-input-gray"
         >
           <option value="" disabled>Seleccione un estatus</option>
-          <option value="1">Activo</option>
-          <option value="0">Inactivo</option>
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
         </select>
       </div>
     </div>
@@ -196,18 +195,17 @@
     </div>
     <div class="flex justify-end gap-1">
       <button 
-        @click="createCourse()" 
+      @click="groupCourse()"
         class="bcb-modal bg-sky-800">
         Guardar
       </button>
       <button 
-        @click="closeModal(0)"
+        @click="success ? closeAndGetGroups(1) : closeModal(1)"
         class="bcb-modal bg-sky-800">
         Aceptar
       </button>
     </div>
   </ModalOptions>
-  -->
   <ModalOptions v-model="modalDeleteGroup" title="Eliminar Grupo">
     <div class="gap-4 mb-2">
       <p>Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea Eliminar el grupo?</p>
@@ -252,11 +250,14 @@
   const loading = ref(false);
   const modalDeleteGroup = ref(false);
   const modalAddGroup = ref(false);
+  const modalEditCourse = ref(false);
   const certificate = ref(null);
   const course = ref(null);
+  const courseId = ref(null);
   const groupId = ref(null);
   const success = ref(null);
   const error = ref(null);
+  const errorSearch = ref(null);
   const professors = ref([]);
   const modules = ref([]);
   const groups = ref([]);
@@ -272,36 +273,62 @@
       titleStore.setColorTitle(newVal.name, newVal.color);
     }
   });
-  const searchCourse = async () => {
-    alert(info.value);
-  };
-  const openModalCourse = (option) => {
-    if (option==1) {
-      courseFlag.value = option;
+  const searchGroup = async () => {
+    errorSearch.value = null;
+    groups.value = [];
+    //
+    const code = info.value;
+    if (!code || isNaN(code)) {
+      errorSearch.value = "El código debe ser un número válido.";
     }
     else {
-      courseFlag.value = option;
-      form.value.certificate_id = certificate.value.id;
-      modalAddGroup.value = true;
+      loading.value = true;
+      const urlGroup = `${apiBaseUrl}${endpointGroups}/by-code/${code}`;
+      try {
+        const response = await axios.get(urlGroup, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        groups.value = response.data;
+        errorSearch.value = groups.value.length > 0 
+          ? null 
+          : 'No se encontraron grupos con este código';
+      } catch (e) {
+        errorSearch.value = e.response?.data?.message || 'Error al cargar el grupo.';
+      } finally {
+        loading.value = false;
+        info.value = null;
+      }  
     }
+  };
+  const openModalCourseAdd = () => {
+    courseFlag.value = 0;
+    form.value.certificate_id = certificate.value.id;
+    modalAddGroup.value = true;
+  }
+  const openModalCourseEdit = async (id) => {
+    courseId.value = id;
+    courseFlag.value = 1;
+    await getCourse();
+    modalEditCourse.value = true;
   };
   const openModalDelete = (id) => {
     groupId.value = id;
     modalDeleteGroup.value = true;
   }
   const closeModal = (option) => {
+    error.value = null;
+    success.value = null;
     if (option==1) {
-
+      modalEditCourse.value = false;
+      course.value = null;
     }
     else if (option==2) {
       modalDeleteGroup.value = false;
-      error.value = null;
-      success.value = null;
     }
     else {
       modalAddGroup.value = false;
-      error.value = null;
-      success.value = null;
       form.value.code = "";  
     }
   }
@@ -325,7 +352,7 @@
     const urlGroups = `${apiBaseUrl}${endpointGroups}`;
     const urlCourses = course.value ? `${apiBaseUrl}${endpointCourses}/${course.value.id}` : null;
     const method = courseFlag.value === 0 ? 'post' : 'put';
-    const body = courseFlag.value === 0 ? form.value : records.value;
+    const body = courseFlag.value === 0 ? form.value : course.value;
     const finalUrl = courseFlag.value === 0 ? urlGroups : urlCourses;
 
     try {
@@ -366,6 +393,27 @@
       loading.value = false;
     }
   };
+  const getCourse = async () => {
+    const url = `${apiBaseUrl}${endpointCourses}/${courseId.value}`;
+    
+    loading.value = true;
+    error.value = null;
+    success.value = null;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      course.value = response.data;
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+    } finally {
+      loading.value = false;
+    }
+
+  };
   const deleteGroup = async () => {
     const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
     
@@ -387,7 +435,6 @@
       loading.value = false;
     }
   };
-
   // Init functions
   const getCertificate = async () => {
     const url = `${apiBaseUrl}${endpointCertificate}/${slug}`;
