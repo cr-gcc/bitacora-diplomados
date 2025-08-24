@@ -29,6 +29,13 @@ const routes = [
     },
   },
   {
+    path: "/diplomados",
+    component: Home,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
     path: "/profesores",
     component: Professors,
     meta: {

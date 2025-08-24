@@ -3,14 +3,18 @@
     <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <div class="flex-1 md:flex md:items-center md:gap-12">
-          <RouterLink :to="'/'" class="block">
-            <span class="sr-only">Home</span>
-            <img :src="logoPath" alt="Logo" class="h-14 w-auto">
-          </RouterLink>
+          <span class="sr-only">Home</span>
+          <img :src="logoPath" alt="Logo" class="h-14 w-auto">
         </div>
         <div class="md:flex md:items-center md:gap-12">
           <nav aria-label="Global" class="hidden md:block">
             <ul class="flex items-center gap-6 text-md">
+              <li>
+                <RouterLink :to="'/diplomados'" class="text-gray-300 transition hover:text-white"
+                >
+                  Diplomados
+                </RouterLink>
+              </li>
               <li>
                 <RouterLink :to="'/profesores'" class="text-gray-300 transition hover:text-white"
                 >
@@ -23,14 +27,6 @@
                   href="#"
                 >
                   Estadísticas
-                </a>
-              </li>
-              <li>
-                <a
-                  class="text-gray-300 transition hover:text-white"
-                  href="#"
-                >
-                  Usuarios
                 </a>
               </li>
             </ul>
@@ -56,6 +52,15 @@
               role="menu"
             >
               <div class="p-2">
+                <div>
+                  <a
+                    href="#"
+                    class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                    role="menuitem"
+                  >
+                    Usuarios
+                  </a>  
+                </div>
                 <div>
                   <a
                     href="#"
