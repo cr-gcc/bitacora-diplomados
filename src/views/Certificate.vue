@@ -87,7 +87,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
-              <tr v-for="course in group.courses" :key="'indc'+course.id">
+              <tr v-for="course, cindex in group.courses" :key="'indc'+course.id">
                 <td class="py-1">{{ course.start_date }}</td>
                 <td class="py-1">{{ course.end_date }}</td>
                 <td class="py-1">{{ course.module.id }}</td>
@@ -96,7 +96,7 @@
                   {{ 
                     course.professor ? 
                     course.professor.name+"  "+course.professor.last_name : 
-                    "" 
+                    "Sin asignación" 
                   }}  
                 </td>
                 <td class="py-1">
@@ -108,11 +108,20 @@
                     Editar
                   </button>
                   <button 
-                    @click="openModalCourseEdit(course.id)"
+                    v-if = "course.review"
+                    @click="openModalReview(course.review.id)"
                     class="bo-mini"
                     :class="['bg-'+certificate.color]">
                     <i class="fa-solid fa-clipboard-check mr-0.5"></i>
-                    Revisión
+                    Revisar
+                  </button>
+                  <button 
+                    v-else
+                    @click="createReview(course.id)"
+                    class="bo-mini mb-1"
+                    :class="['bg-'+certificate.color]">
+                    <i class="fa-solid fa-calendar-plus mr-0.5"></i>
+                    Cargar Revisión
                   </button>
                 </td>
               </tr>
@@ -121,7 +130,6 @@
         </div>
       </details>
     </div>
-    {{ course }}
   </div>
   <div v-else>
     <p>{{ error }}</p>
@@ -142,7 +150,7 @@
     </div>
     <div class="flex justify-end gap-1">
       <button 
-        @click="groupCourse()" 
+        @click="addEditGroupCourse()" 
         class="bcb-modal bg-sky-800">
         Guardar
       </button>
@@ -195,7 +203,7 @@
     </div>
     <div class="flex justify-end gap-1">
       <button 
-      @click="groupCourse()"
+        @click="addEditGroupCourse()"
         class="bcb-modal bg-sky-800">
         Guardar
       </button>
@@ -229,15 +237,91 @@
       </button>
     </div>
   </ModalOptions>
+  <ModalOptions v-model="modalReview" title="Revisión Curso">
+    <div class="grid-max-3 gap-4 mb-2">
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Plan de Trabajo</span>
+        <label
+          for="plan"
+          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
+        >
+          <input v-model="review.study_plan" type="checkbox" id="plan" class="peer sr-only" />
+          <span
+            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
+          ></span>
+        </label>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Fechas</span>
+        <label
+          for="dates"
+          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
+        >
+          <input v-model="review.dates" type="checkbox" id="dates" class="peer sr-only" />
+          <span
+            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
+          ></span>
+        </label>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Examen</span>
+        <select
+          v-model="review.exam"
+          class="base-input-gray"
+        >
+          <option value="pendant">Pendiente</option>
+          <option value="tested">Realizado</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Estudiantes</span>
+        <input v-model="review.students" type="number" class="base-input-gray"/>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Recursadores</span>
+        <input v-model="review.repeaters" type="number" class="base-input-gray"/>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Total</span>
+        <input v-model="totalStudentsRepeaters" type="number" class="base-input-gray" disabled/>
+      </div>
+      <div class="md:col-span-3">
+        <label for="comentario">Comentario</label>
+        <textarea v-model="review.comments" id="comentario"
+          class="base-input-gray mt-0.5 w-full h-24 resize-none rounded border-gray-300 shadow-sm sm:text-sm"
+          placeholder="Escribe tu comentario aquí..."
+        ></textarea>
+      </div>
+    </div>
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
+    <div v-if="success" class="mt-2 mb-1">
+      <p class="text-lime-700">{{ success }}</p>
+    </div>
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="editReview()"
+        class="bcb-modal bg-sky-800">
+        Guardar
+      </button>
+      <button 
+        @click="success ? closeAndGetGroups(3) : closeModal(3)"
+        class="bcb-modal bg-sky-800">
+        Aceptar
+      </button>
+    </div>
+  </ModalOptions>
 </template>
 
 <script setup>
-  import { onMounted, watch, ref } from 'vue';
+  import { onMounted, computed, watch, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import axios from 'axios';
 
+  // Data
   const route = useRoute();
   const slug = route.params.slug;
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -246,15 +330,18 @@
   const endpointModules = import.meta.env.VITE_MODULES;
   const endpointCourses= import.meta.env.VITE_COURSES;
   const endpointGroups = import.meta.env.VITE_GROUPS;
+  const endpointReviews = import.meta.env.VITE_REVIEWS;
   const titleStore = useTitleStore();
   const loading = ref(false);
   const modalDeleteGroup = ref(false);
   const modalAddGroup = ref(false);
   const modalEditCourse = ref(false);
+  const modalReview = ref(false);
   const certificate = ref(null);
   const course = ref(null);
   const courseId = ref(null);
   const groupId = ref(null);
+  const reviewId = ref(null);
   const success = ref(null);
   const error = ref(null);
   const errorSearch = ref(null);
@@ -267,16 +354,104 @@
     'certificate_id':'',
     'code':'',
   });
+  const review = ref({
+    'course_id':'',
+    'study_plan':'',
+    'dates':'',
+    'exam':'',
+    'students':'',
+    'repeaters':'',
+    'comments':'',
+  });
 
+  //  Observers
+  const totalStudentsRepeaters = computed(() => review.value.students + review.value.repeaters);
   watch(() => certificate.value, (newVal) => {
     if (newVal.name && newVal.color) {
       titleStore.setColorTitle(newVal.name, newVal.color);
     }
   });
+
+  //  Open modals
+  const openModalCourseAdd = () => {
+    courseFlag.value = 0;
+    form.value.certificate_id = certificate.value.id;
+    modalAddGroup.value = true;
+  }
+  const openModalCourseEdit = async (id) => {
+    courseId.value = id;
+    courseFlag.value = 1;
+    await getCourse();
+    modalEditCourse.value = true;
+  };
+  const openModalDelete = (id) => {
+    groupId.value = id;
+    modalDeleteGroup.value = true;
+  }
+  const openModalReview = async (id) => {
+    setInitValues(1);
+    const urlReview = `${apiBaseUrl}${endpointReviews}/${id}`;
+    reviewId.value = id;
+    try {
+      const response = await axios.get(urlReview, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      loading.value = false;
+      if (response.status == 200) {
+        review.value.course_id = response.data.course_id;
+        review.value.study_plan = Boolean(response.data.study_plan);
+        review.value.dates = Boolean(response.data.dates);
+        review.value.exam = response.data.exam;
+        review.value.students = response.data.students;
+        review.value.repeaters = response.data.repeaters;
+        review.value.comments = response.data.comments;
+        modalReview.value = true;
+      }
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+    } 
+    finally {
+      loading.value = false;
+    }
+  }
+
+  //  Close modals
+  const closeModal = (option) => {
+    setInitValues(0);
+    if (option==1) {
+      modalEditCourse.value = false;
+      course.value = null;
+    }
+    else if (option==2) {
+      modalDeleteGroup.value = false;
+    }
+    else if (option==3) {
+      modalReview.value = false;
+      review.value.course_id = "";
+      review.value.study_plan = "";
+      review.value.dates = "";
+      review.value.exam = "";
+      review.value.students = "";
+      review.value.repeaters = "";
+      review.value.comments = "";
+    }
+    else {
+      modalAddGroup.value = false;
+      form.value.code = "";  
+    }
+  }
+  const closeAndGetGroups = (option) => {
+    closeModal(option);
+    getGroupCourses();
+  }
+
+  //  Funtions
   const searchGroup = async () => {
     errorSearch.value = null;
     groups.value = [];
-    //
     const code = info.value;
     if (!code || isNaN(code)) {
       errorSearch.value = "El código debe ser un número válido.";
@@ -302,53 +477,8 @@
       }  
     }
   };
-  const openModalCourseAdd = () => {
-    courseFlag.value = 0;
-    form.value.certificate_id = certificate.value.id;
-    modalAddGroup.value = true;
-  }
-  const openModalCourseEdit = async (id) => {
-    courseId.value = id;
-    courseFlag.value = 1;
-    await getCourse();
-    modalEditCourse.value = true;
-  };
-  const openModalDelete = (id) => {
-    groupId.value = id;
-    modalDeleteGroup.value = true;
-  }
-  const closeModal = (option) => {
-    error.value = null;
-    success.value = null;
-    if (option==1) {
-      modalEditCourse.value = false;
-      course.value = null;
-    }
-    else if (option==2) {
-      modalDeleteGroup.value = false;
-    }
-    else {
-      modalAddGroup.value = false;
-      form.value.code = "";  
-    }
-  }
-  const closeAndGetGroups = (option) => {
-    if (option==1) {
-      closeModal(1);
-    }
-    else if (option==2) {
-      closeModal(2);
-    }
-    else{
-      closeModal(0);
-    }
-    getGroupCourses();
-  }
-  const groupCourse = async () => {
-    loading.value = true;
-    error.value = null;
-    success.value = null;
-
+  const addEditGroupCourse = async () => {
+    setInitValues(1);
     const urlGroups = `${apiBaseUrl}${endpointGroups}`;
     const urlCourses = course.value ? `${apiBaseUrl}${endpointCourses}/${course.value.id}` : null;
     const method = courseFlag.value === 0 ? 'post' : 'put';
@@ -373,33 +503,9 @@
       loading.value = false;    
     }
   }
-  //const getCoursesByStatus = async () => {};
-  const getGroupCourses = async () => {
-    const url = `${apiBaseUrl}${endpointGroups}-courses`;
-    
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      groups.value = response.data;
-    } catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } finally {
-      loading.value = false;
-    }
-  };
   const getCourse = async () => {
+    setInitValues(1);
     const url = `${apiBaseUrl}${endpointCourses}/${courseId.value}`;
-    
-    loading.value = true;
-    error.value = null;
-    success.value = null;
-
     try {
       const response = await axios.get(url, {
         headers: {
@@ -407,19 +513,35 @@
         },
       });
       course.value = response.data;
-    } catch (e) {
+    } 
+    catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } finally {
+    } 
+    finally {
       loading.value = false;
     }
-
+  };
+  const getGroupCourses = async () => {
+    setInitValues(1);
+    const url = `${apiBaseUrl}${endpointGroups}-courses`;
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      groups.value = response.data;
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+    } 
+    finally {
+      loading.value = false;
+    }
   };
   const deleteGroup = async () => {
+    setInitValues(1);
     const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
-    
-    loading.value = true;
-    error.value = null;
-
     try {
       const response = await axios.delete(url, {
         headers: {
@@ -429,17 +551,72 @@
       if (response.status == 200) {
         success.value = response.data.message;
       }
-    } catch (e) {
+    } 
+    catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } finally {
+    } 
+    finally {
       loading.value = false;
     }
   };
-  // Init functions
-  const getCertificate = async () => {
-    const url = `${apiBaseUrl}${endpointCertificate}/${slug}`;
-    loading.value = true;
+  const createReview = async (id) => {
+    setInitValues(1);
+    const urlReview = `${apiBaseUrl}${endpointReviews}`;
+    const body = ref({
+      'course_id':id
+    });
+
+    try {
+      const response = await axios.post(urlReview, body.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status == 200) {
+        success.value = response.data.message;
+        alert(success.value);
+        getGroupCourses();
+      }
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar la revisión';
+      alert(error.value);
+    }
+    finally {
+      loading.value = false;    
+    }
+  }
+  const editReview = async () => {
+    setInitValues(1);
+    const urlReview = `${apiBaseUrl}${endpointReviews}/${reviewId.value}`;
+    try {
+      const response = await axios.put(urlReview, review.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status == 200) {
+        success.value = response.data.message;
+      }
+    }
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al editar la revisión';
+    }
+    finally {
+      loading.value = false;
+    }
+  }
+  const setInitValues = (option) => {    
+    loading.value = option==1 ? true : false;
     error.value = null;
+    success.value = null;
+  }
+  //  Init functions
+  const getCertificate = async () => {
+    setInitValues(1);
+    const url = `${apiBaseUrl}${endpointCertificate}/${slug}`;
     try {
       const response = await axios.get(url, {
         headers: {
@@ -447,11 +624,13 @@
         },
       });
       certificate.value = response.data;
-      } catch (e) {
-        error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-      } finally {
-        loading.value = false;
-      }
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+    } 
+    finally {
+      loading.value = false;
+    }
   };
   const getActiveProfessors = async () => {
     const url = `${apiBaseUrl}${endpointProfessors}`;
@@ -462,7 +641,8 @@
         },
       });
       professors.value = response.data; 
-    } catch (e) {
+    } 
+    catch (e) {
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     }
   }
@@ -475,10 +655,13 @@
         },
       });
       modules.value = response.data; 
-    } catch (e) {
+    } 
+    catch (e) {
       error.value = e.response?.data?.message || 'Error consultar los módulos';
     }
   }
+
+  //  Hooks
   onMounted(async () => {
     await getCertificate();
     getActiveProfessors();
