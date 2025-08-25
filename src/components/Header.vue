@@ -22,12 +22,10 @@
                 </RouterLink>
               </li>
               <li>
-                <a
-                  class="text-gray-300 transition hover:text-white"
-                  href="#"
+                <RouterLink :to="'/estadisticas'" class="text-gray-300 transition hover:text-white"
                 >
-                  Estadísticas
-                </a>
+                  Estadisticas
+                </RouterLink>
               </li>
             </ul>
           </nav>
