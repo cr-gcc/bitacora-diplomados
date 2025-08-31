@@ -40,6 +40,9 @@
       Buscar
     </button>
   </div>
+  <div v-if="error" class="mt-2 mb-1">
+    <p class="text-red-700">{{ error }}</p>
+  </div>
   <div v-if="courses" class="bg-gray-300 px-4 py-2 text-sm">
     <div class="overflow-x-auto">
       <table class="table-auto w-full min-w-max">
@@ -99,12 +102,11 @@
   const titleStore = useTitleStore();
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpointCertificate = import.meta.env.VITE_CERTIFICATES
-  const endpointCourses= import.meta.env.VITE_COURSES;
+  const endpointStatistics= import.meta.env.VITE_STATISTICS;
   const certificates = ref(null);
   const courses = ref(null);
   const loading = ref(false);
   const error = ref(null);
-  const success = ref(null);
   const search = ref({
     'certificate_id':'',
     'code':'',
@@ -118,28 +120,66 @@
   const setInitValues = (option) => {    
     loading.value = option==1 ? true : false;
     error.value = null;
-    success.value = null;
   }
   const searchData = async () => {
+    courses.value = null;
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointCourses}/statistics`;
+    const url = `${apiBaseUrl}${endpointStatistics}/courses`;
     try {
       const response = await axios.post(url, search.value, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      courses.value = response.data;
+      if (response.data.length) {
+        courses.value = response.data;  
+      }
+      else {
+        error.value = "No se encontraron resultados con los parámetros proporcionados."
+      }
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+      error.value = e.response?.data?.message || 'Error al cargar los registros.';
     } 
     finally {
       loading.value = false;
     }
   }
   const downloadData = async () => {
-    
+    courses.value = null;
+    setInitValues(1);
+    const url = `${apiBaseUrl}${endpointStatistics}/courses/download`;
+    try {
+      const response = await axios.post(url, search.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        responseType: 'blob',   
+      });
+      
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      // Nombre dinámico si el backend lo manda en el header
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'courses.xlsx';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match?.[1]) {
+          fileName = match[1];
+        }
+      }
+      // Disparar descarga automática
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar los registros.';
+    } 
+    finally {
+      loading.value = false;
+    }
   }
 
   //  Init functions
