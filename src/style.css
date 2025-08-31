@@ -41,6 +41,10 @@
   @apply w-full px-2 text-black bg-gray-200 border-2 border-gray-200 focus:border-gray-400 focus:outline-none;
 }
 
+.basic-bag {
+  @apply text-white px-2 py-0.5 rounded-full text-xs;
+}
+
 
 body {
   font-family: 'Roboto Condensed', sans-serif;

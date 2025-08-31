@@ -1,33 +1,28 @@
 <template>
   <div v-if="certificate">
     <h3 class="text-3xl mb-2" :class="'text-'+certificate.color">Grupos</h3>
-    <div class="grid-max-5 gap-4 mb-4">
+    <div class="grid-max-4 gap-4 mb-4">
       <div>
         <input
+          v-model="info"
           type="number"
           placeholder="Buscar"
           class="w-full rounded px-2 py-1 text-md border"
           :class="'border-'+certificate.color"
-          v-model="info"
           @keyup.enter="searchGroup()"
-        />
+        ></input>
       </div>
-      <div>
-        <button 
-          @click="getCoursesByStatus(0)"
-          class="bcb-certificate" 
-          :class="['border-'+certificate.color, 'bg-'+certificate.color]">
-          Finalizados
-        </button>
-      </div>
-      <div>
-        <button 
-          @click="getCoursesByStatus(1)"
-          class="bcb-certificate" 
-          :class="['border-'+certificate.color, 'bg-'+certificate.color]">
-          Activos
-        </button>
-      </div>
+      <select
+        v-model="status"
+        placeholder="Estatus"
+        class="w-full rounded px-2 py-1 text-md border"
+        :class="'border-'+certificate.color"
+      >
+        <option value="" disabled>Seleccione un estatus</option>
+        <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
+        <option value="finished">Finalizado</option>
+      </select>
       <div>
         <button 
           @click="getGroupCourses()"
@@ -45,6 +40,9 @@
         </button>
       </div>
     </div>
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
     <div v-if="errorSearch">
       <p class="text-red-700">{{ errorSearch }}</p>
     </div>
@@ -54,7 +52,18 @@
           class="flex items-center justify-between gap-1.5 rounded-md border border-gray-100 px-2 py-1 text-white"
           :class="['border-'+certificate.color, 'bg-'+certificate.color]"
         >
-          <h2 class="text-lg font-medium">{{ group.code }} <!--<span class="bg-green-700 px-2">Activo</span>--></h2>
+          <h2 class="text-lg font-medium flex items-center gap-2">
+            {{ group.code }} 
+            <span v-if="group.status === 'active'" class="bg-green-700 basic-bag"
+            >
+              Activo
+            </span>
+            <span v-else-if="group.status === 'inactive'" class="bg-red-700 basic-bag"
+            >
+              Inactivo
+            </span>
+            <span v-else class="bg-gray-700 basic-bag">Finalizado</span>
+          </h2>
           <svg
             class="size-5 shrink-0 transition-transform duration-300 group-open:-rotate-180"
             xmlns="http://www.w3.org/2000/svg"
@@ -65,8 +74,16 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </summary>
-        <div>
+        <div class="px-2">
           <div class="flex justify-end gap-2 py-1">
+            <button 
+              @click="openModalDelete(group.id)"
+              class="bo-mini"
+              :class="['bg-'+certificate.color]">
+              <i class="fa-solid fa-pen mr-0.5"></i>
+              Editar
+            </button>
+            <!--
             <button 
               @click="openModalDelete(group.id)"
               class="bo-mini"
@@ -74,6 +91,14 @@
               <i class="fa-solid fa-trash"></i>
               Eliminar
             </button>
+            <button 
+              @click="openModalFinish(group.id)"
+              class="bo-mini"
+              :class="['bg-'+certificate.color]">
+              <i class="fa-solid fa-clipboard-check"></i>
+              Finalizar
+            </button>
+            -->
           </div>
           <table class="table-auto w-full">
             <thead>
@@ -87,10 +112,10 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
-              <tr v-for="course, cindex in group.courses" :key="'indc'+course.id">
+              <tr v-for="course in group.courses" :key="'indc'+course.id">
                 <td class="py-1">{{ course.start_date }}</td>
                 <td class="py-1">{{ course.end_date }}</td>
-                <td class="py-1">{{ course.module.id }}</td>
+                <td class="py-1">{{ course.module.number }}</td>
                 <td class="py-1">{{ course.module.name }}</td>
                 <td class="py-1">
                   {{ 
@@ -237,6 +262,30 @@
       </button>
     </div>
   </ModalOptions>
+  <ModalOptions v-model="modalFinishGroup" title="Terminar Grupo">
+    <div class="gap-4 mb-2">
+      <p>Al finalizar el grupo, este no se borrará, simplemente se cambiara su estatus a finalizado. ¿Desea finalizar el grupo?</p>
+    </div>
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
+    <div v-if="success" class="mt-2 mb-1">
+      <p class="text-lime-700">{{ success }}</p>
+    </div>
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="finishGroup()" 
+        class="bcb-modal bg-sky-800">
+        Eliminar
+      </button>
+      <button 
+        @click="success ? closeAndGetGroups(4) : closeModal(4)"
+        class="bcb-modal bg-sky-800">
+        Aceptar
+      </button>
+    </div>
+
+  </ModalOptions>
   <ModalOptions v-model="modalReview" title="Revisión Curso">
     <div class="grid-max-3 gap-4 mb-2">
       <div class="flex items-center gap-3">
@@ -320,7 +369,6 @@
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import axios from 'axios';
-
   // Data
   const route = useRoute();
   const slug = route.params.slug;
@@ -336,6 +384,7 @@
   const modalDeleteGroup = ref(false);
   const modalAddGroup = ref(false);
   const modalEditCourse = ref(false);
+  const modalFinishGroup = ref(false);
   const modalReview = ref(false);
   const certificate = ref(null);
   const course = ref(null);
@@ -350,6 +399,7 @@
   const groups = ref([]);
   const courseFlag = ref(0);
   const info = ref("");
+  const status = ref("");
   const form = ref({
     'certificate_id':'',
     'code':'',
@@ -374,6 +424,7 @@
 
   //  Open modals
   const openModalCourseAdd = () => {
+    setInitValues(0)
     courseFlag.value = 0;
     form.value.certificate_id = certificate.value.id;
     modalAddGroup.value = true;
@@ -387,6 +438,10 @@
   const openModalDelete = (id) => {
     groupId.value = id;
     modalDeleteGroup.value = true;
+  }
+  const openModalFinish = (id) => {
+    groupId.value = id;
+    modalFinishGroup.value = true;
   }
   const openModalReview = async (id) => {
     setInitValues(1);
@@ -438,6 +493,9 @@
       review.value.repeaters = "";
       review.value.comments = "";
     }
+    else if (option==4){
+      modalFinishGroup.value = false;
+    }
     else {
       modalAddGroup.value = false;
       form.value.code = "";  
@@ -458,7 +516,7 @@
     }
     else {
       loading.value = true;
-      const urlGroup = `${apiBaseUrl}${endpointGroups}/by-code/${code}`;
+      const urlGroup = `${apiBaseUrl}${endpointGroups}/${certificate.value.id}/by-code/${code}`;
       try {
         const response = await axios.get(urlGroup, {
           headers: {
@@ -521,19 +579,27 @@
       loading.value = false;
     }
   };
+  const getCoursesByStatus = (opt) => {
+    alert(opt);
+  };
   const getGroupCourses = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointGroups}-courses`;
+    const url = `${apiBaseUrl}${endpointGroups}-courses/${certificate.value.id}`;
     try {
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      groups.value = response.data;
+      if (response.data.length) {
+        groups.value = response.data;
+      }
+      else  {
+        error.value = "No se encontraron grupos de este diplomado."
+      }
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+      error.value = e.response?.data?.message || 'Error al cargar los grupos';
     } 
     finally {
       loading.value = false;
@@ -559,6 +625,9 @@
       loading.value = false;
     }
   };
+  const finishGroup = async () => {
+    setInitValues(1);
+  }
   const createReview = async (id) => {
     setInitValues(1);
     const urlReview = `${apiBaseUrl}${endpointReviews}`;
