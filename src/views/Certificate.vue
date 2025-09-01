@@ -181,7 +181,6 @@
         <option value="inactive">Inactivo</option>
         <option value="finished">Finalizado</option>
       </select>
-      {{ formEdit }}
     </div>
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
@@ -606,7 +605,6 @@
     const body = ref({
       'course_id':id
     });
-
     try {
       const response = await axios.post(urlReview, body.value, {
         headers: {
@@ -617,7 +615,7 @@
       if (response.status == 200) {
         success.value = response.data.message;
         alert(success.value);
-        getGroupCourses();
+        searchGroupsCourses(3);
       }
     } 
     catch (e) {
