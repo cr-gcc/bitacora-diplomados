@@ -4,12 +4,12 @@
     <div class="grid-max-4 gap-4 mb-4">
       <div>
         <input
-          v-model="info"
+          v-model="code"
           type="number"
           placeholder="Buscar"
           class="w-full rounded px-2 py-1 text-md border"
           :class="'border-'+certificate.color"
-          @keyup.enter="searchGroup()"
+          @keyup.enter="searchGroupsCourses(1)"
         ></input>
       </div>
       <select
@@ -17,6 +17,7 @@
         placeholder="Estatus"
         class="w-full rounded px-2 py-1 text-md border"
         :class="'border-'+certificate.color"
+        @change="searchGroupsCourses(2)"
       >
         <option value="" disabled>Seleccione un estatus</option>
         <option value="active">Activo</option>
@@ -25,7 +26,7 @@
       </select>
       <div>
         <button 
-          @click="getGroupCourses()"
+          @click="searchGroupsCourses(3)"
           class="bcb-certificate" 
           :class="['border-'+certificate.color, 'bg-'+certificate.color]">
           Todos
@@ -42,9 +43,6 @@
     </div>
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="errorSearch">
-      <p class="text-red-700">{{ errorSearch }}</p>
     </div>
     <div v-if="groups.length>0" class="space-y-4">
       <details v-for="group in groups" :key="'indg'+group.id" class="group [&_summary::-webkit-details-marker]:hidden">
@@ -77,28 +75,12 @@
         <div class="px-2">
           <div class="flex justify-end gap-2 py-1">
             <button 
-              @click="openModalDelete(group.id)"
+              @click="openModalEdit(group.id, group.certificate_id, group.code)"
               class="bo-mini"
               :class="['bg-'+certificate.color]">
               <i class="fa-solid fa-pen mr-0.5"></i>
               Editar
             </button>
-            <!--
-            <button 
-              @click="openModalDelete(group.id)"
-              class="bo-mini"
-              :class="['bg-'+certificate.color]">
-              <i class="fa-solid fa-trash"></i>
-              Eliminar
-            </button>
-            <button 
-              @click="openModalFinish(group.id)"
-              class="bo-mini"
-              :class="['bg-'+certificate.color]">
-              <i class="fa-solid fa-clipboard-check"></i>
-              Finalizar
-            </button>
-            -->
           </div>
           <table class="table-auto w-full">
             <thead>
@@ -182,7 +164,46 @@
       <button 
         @click="success ? closeAndGetGroups(0) : closeModal(0)"
         class="bcb-modal bg-sky-800">
-        Aceptar
+        Salir
+      </button>
+    </div>
+  </ModalOptions>
+  <ModalOptions v-model="modalEditGroup" title="Editar Grupo">
+    <div class="gap-4 mb-2">
+      <select
+        v-model="formEdit.status"
+        placeholder="Estatus"
+        class="w-full rounded px-2 py-1 text-md border"
+        :class="'border-'+certificate.color"
+      >
+        <option value="" disabled>Seleccione un estatus</option>
+        <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
+        <option value="finished">Finalizado</option>
+      </select>
+      {{ formEdit }}
+    </div>
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
+    <div v-if="success" class="mt-2 mb-1">
+      <p class="text-lime-700">{{ success }}</p>
+    </div>
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="deleteGroup()" 
+        class="bcb-modal bg-sky-800">
+        Eliminar
+      </button>
+      <button 
+        @click="editGroup()" 
+        class="bcb-modal bg-sky-800">
+        Editar
+      </button>
+      <button 
+        @click="success ? closeAndGetGroups(2) : closeModal(2)"
+        class="bcb-modal bg-sky-800">
+        Salir
       </button>
     </div>
   </ModalOptions>
@@ -208,17 +229,6 @@
           </option>
         </select>
       </div>
-      <div>
-        <span class="whitespace-nowrap">Estatus</span>
-        <select
-          v-model="course.status"
-          class="base-input-gray"
-        >
-          <option value="" disabled>Seleccione un estatus</option>
-          <option value="active">Activo</option>
-          <option value="inactive">Inactivo</option>
-        </select>
-      </div>
     </div>
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
@@ -235,56 +245,9 @@
       <button 
         @click="success ? closeAndGetGroups(1) : closeModal(1)"
         class="bcb-modal bg-sky-800">
-        Aceptar
+        Salir
       </button>
     </div>
-  </ModalOptions>
-  <ModalOptions v-model="modalDeleteGroup" title="Eliminar Grupo">
-    <div class="gap-4 mb-2">
-      <p>Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea Eliminar el grupo?</p>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="deleteGroup()" 
-        class="bcb-modal bg-sky-800">
-        Eliminar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(2) : closeModal(2)"
-        class="bcb-modal bg-sky-800">
-        Aceptar
-      </button>
-    </div>
-  </ModalOptions>
-  <ModalOptions v-model="modalFinishGroup" title="Terminar Grupo">
-    <div class="gap-4 mb-2">
-      <p>Al finalizar el grupo, este no se borrará, simplemente se cambiara su estatus a finalizado. ¿Desea finalizar el grupo?</p>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="finishGroup()" 
-        class="bcb-modal bg-sky-800">
-        Eliminar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(4) : closeModal(4)"
-        class="bcb-modal bg-sky-800">
-        Aceptar
-      </button>
-    </div>
-
   </ModalOptions>
   <ModalOptions v-model="modalReview" title="Revisión Curso">
     <div class="grid-max-3 gap-4 mb-2">
@@ -381,7 +344,7 @@
   const endpointReviews = import.meta.env.VITE_REVIEWS;
   const titleStore = useTitleStore();
   const loading = ref(false);
-  const modalDeleteGroup = ref(false);
+  const modalEditGroup = ref(false);
   const modalAddGroup = ref(false);
   const modalEditCourse = ref(false);
   const modalFinishGroup = ref(false);
@@ -389,20 +352,24 @@
   const certificate = ref(null);
   const course = ref(null);
   const courseId = ref(null);
-  const groupId = ref(null);
   const reviewId = ref(null);
+  const groupId = ref(null);
   const success = ref(null);
   const error = ref(null);
-  const errorSearch = ref(null);
   const professors = ref([]);
   const modules = ref([]);
   const groups = ref([]);
   const courseFlag = ref(0);
-  const info = ref("");
   const status = ref("");
-  const form = ref({
+  const code = ref("");
+  const formEdit = ref({
     'certificate_id':'',
     'code':'',
+    'status':''
+  })
+  const form = ref({
+    'certificate_id':'',
+    'code':''
   });
   const review = ref({
     'course_id':'',
@@ -435,13 +402,11 @@
     await getCourse();
     modalEditCourse.value = true;
   };
-  const openModalDelete = (id) => {
+  const openModalEdit = (id, certificate_id, code) => {
     groupId.value = id;
-    modalDeleteGroup.value = true;
-  }
-  const openModalFinish = (id) => {
-    groupId.value = id;
-    modalFinishGroup.value = true;
+    formEdit.value.certificate_id = certificate_id;
+    formEdit.value.code = code;
+    modalEditGroup.value = true;
   }
   const openModalReview = async (id) => {
     setInitValues(1);
@@ -481,7 +446,7 @@
       course.value = null;
     }
     else if (option==2) {
-      modalDeleteGroup.value = false;
+      modalEditGroup.value = false;
     }
     else if (option==3) {
       modalReview.value = false;
@@ -503,36 +468,42 @@
   }
   const closeAndGetGroups = (option) => {
     closeModal(option);
-    getGroupCourses();
+    searchGroupsCourses(3);
   }
 
   //  Funtions
-  const searchGroup = async () => {
-    errorSearch.value = null;
+  const searchGroupsCourses = async (option) => {
+    setInitValues(1);
     groups.value = [];
-    const code = info.value;
-    if (!code || isNaN(code)) {
-      errorSearch.value = "El código debe ser un número válido.";
+    const form = ref(null);
+    //
+    if (option==1) {
+      form.value = {'code':code.value}; 
+    }
+    else if (option==2) {
+      form.value = {'status':status.value};
     }
     else {
-      loading.value = true;
-      const urlGroup = `${apiBaseUrl}${endpointGroups}/${certificate.value.id}/by-code/${code}`;
-      try {
-        const response = await axios.get(urlGroup, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        groups.value = response.data;
-        errorSearch.value = groups.value.length > 0 
-          ? null 
-          : 'No se encontraron grupos con este código';
-      } catch (e) {
-        errorSearch.value = e.response?.data?.message || 'Error al cargar el grupo.';
-      } finally {
-        loading.value = false;
-        info.value = null;
-      }  
+      form.value = {'all':true};
+    }
+    //
+    const urlGroup = `${apiBaseUrl}${endpointGroups}/${certificate.value.id}/search`;
+    try {
+      const response = await axios.post(urlGroup, form.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      groups.value = response.data;
+      error.value = groups.value.length > 0 
+        ? null 
+        : 'No se encontraron grupos con este código';
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar el/los grupo.';
+    } finally {
+      loading.value = false;
+      code.value = "";
+      status.value = "";
     }
   };
   const addEditGroupCourse = async () => {
@@ -579,54 +550,55 @@
       loading.value = false;
     }
   };
-  const getCoursesByStatus = (opt) => {
-    alert(opt);
-  };
-  const getGroupCourses = async () => {
-    setInitValues(1);
-    const url = `${apiBaseUrl}${endpointGroups}-courses/${certificate.value.id}`;
-    try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (response.data.length) {
-        groups.value = response.data;
-      }
-      else  {
-        error.value = "No se encontraron grupos de este diplomado."
-      }
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar los grupos';
-    } 
-    finally {
-      loading.value = false;
+  const deleteGroup = async () => {
+    const confirmed = window.confirm("Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea eliminar el grupo?");
+    if (!confirmed) {
+      return 0;
+    }
+    else {
+      setInitValues(1);
+      const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
+      try {
+        const response = await axios.delete(url, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (response.status == 200) {
+          success.value = response.data.message;
+        }
+      } 
+      catch (e) {
+        error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+      } 
+      finally {
+        loading.value = false;
+      }  
     }
   };
-  const deleteGroup = async () => {
+  const editGroup = async () => {
     setInitValues(1);
     const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
     try {
-      const response = await axios.delete(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (response.status == 200) {
-        success.value = response.data.message;
-      }
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } 
-    finally {
-      loading.value = false;
-    }
-  };
-  const finishGroup = async () => {
-    setInitValues(1);
+        const response = await axios.put(url, formEdit.value, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+        });
+        if (response.status == 200) {
+          success.value = response.data.message;
+        }
+        else {
+          error.value = "Error";
+        }
+      } 
+      catch (e) {
+        error.value = e.response?.data?.message || 'Error al cargar el diplomado';
+      } 
+      finally {
+        loading.value = false;
+      }  
   }
   const createReview = async (id) => {
     setInitValues(1);
