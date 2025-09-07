@@ -141,7 +141,6 @@
   <div v-else>
     <p>{{ error }}</p>
   </div>  
-  <SplashScreen :isLoadingSS="loading" />
   <ModalOptions v-model="modalAddGroup" title="Agregar Grupo">
     <div class="gap-4 mb-2">
       <div>
@@ -323,6 +322,7 @@
       </button>
     </div>
   </ModalOptions>
+  <SplashScreen :isLoadingSS="loading" />
 </template>
 
 <script setup>
@@ -470,7 +470,7 @@
     searchGroupsCourses(3);
   }
 
-  //  Funtions
+  //  Functions
   const searchGroupsCourses = async (option) => {
     setInitValues(1);
     groups.value = [];

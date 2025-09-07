@@ -77,7 +77,6 @@
       </table>
     </div>
   </div>
-  <SplashScreen :isLoadingSS="loading" />
   <ModalOptions v-model="isModalOpen" title="Profesor">
     <div v-if="professorFlag==1" class="grid-max-3 gap-4">
       <div>
@@ -174,6 +173,7 @@
       </button>
     </div>
   </ModalOptions>
+  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref } from 'vue'; 
