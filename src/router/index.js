@@ -4,6 +4,7 @@ import Home from "@/views/Home.vue";
 import Certificate from "@/views/Certificate.vue";
 import Professors from "@/views/Professors.vue";
 import Statistics from "@/views/Statistics.vue";
+import Users from "@/views/Users.vue";
 
 const routes = [
   {
@@ -45,6 +46,13 @@ const routes = [
   {
     path: "/estadisticas",
     component: Statistics,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: "/perfiles",
+    component: Users,
     meta: {
       requiresAuth: true,
     },
