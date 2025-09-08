@@ -51,7 +51,7 @@ const routes = [
     },
   },
   {
-    path: "/perfiles",
+    path: "/usuarios",
     component: Users,
     meta: {
       requiresAuth: true,

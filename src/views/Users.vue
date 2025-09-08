@@ -1,6 +1,16 @@
 <template>
-  <div v-if="users.length>0" class="bg-gray-300 px-4 py-2">
-    <div class="overflow-x-auto">
+  <div class="bg-gray-300 px-4 py-2">
+    <div class="my-1">
+      <div class="flex flex-col items-end">
+        <button 
+          @click="openModalAdd()"
+          class="bo-mini mb-1 bg-sky-900">
+          <i class="fa-solid fa-user-plus mr-0.5"></i>
+          Agrear Usuario
+        </button>
+      </div>
+    </div>
+    <div v-if="users.length>0" class="overflow-x-auto">
       <table class="table-auto w-full min-w-max">
         <thead class="text-center">
           <tr>
@@ -19,18 +29,18 @@
             <td class="px-1 pt-1">**********</td>
             <td class="px-1 pt-1">
               <div class="flex flex-col items-center">
-              <button 
-                @click="openModalEdit(index)"
-                class="bo-mini mb-1 bg-sky-900">
-                <i class="fa-solid fa-pen mr-0.5"></i>
-                Editar
-              </button>
-              <button 
-                @click="openModalRoles(index)"
-                class="bo-mini mb-1 bg-sky-900">
-                <i class="fa-solid fa-users-gear mr-0.5"></i>
-                Roles
-              </button>
+                <button 
+                  @click="openModalEdit(index)"
+                  class="bo-mini mb-1 bg-sky-900">
+                  <i class="fa-solid fa-pen mr-0.5"></i>
+                  Editar
+                </button>
+                <button 
+                  @click="openModalRoles(index)"
+                  class="bo-mini mb-1 bg-sky-900">
+                  <i class="fa-solid fa-users-gear mr-0.5"></i>
+                  Roles
+                </button>
               <button 
                 @click="openModalPermissions(index)"
                 class="bo-mini mb-1 bg-sky-900">
@@ -44,8 +54,10 @@
       </table>
     </div>
   </div>
-  {{ roleSelected }}
-  <ModalOptions v-model="modalEdit" title="Editar Perfil">
+  <ModalOptions 
+    :title="userFlag ? 'Editar Perfil' : 'Agregar Usuario'"
+    v-model="modalAddEdit"
+  >
     <div class="grid-max-3 gap-4 mb-2">
       <div>
         <span class="whitespace-nowrap">Nombre</span>
@@ -68,7 +80,7 @@
     </div>
     <div class="flex justify-end gap-1">
       <button 
-        @click="editUser()"
+        @click="addEditUser()"
         class="bcb-modal bg-sky-800">
         Guardar
       </button>
@@ -81,15 +93,15 @@
   </ModalOptions>
   <ModalOptions v-model="modalRoles" title="Roles">
     <div class="grid-max-3 gap-4 mb-2">
-      <div v-for="role in roles" :key="role.id" class="flex items-center gap-2">
-      <input
-        type="radio"
-        :value="role.id"
-        v-model="roleSelected"
-        name="role"
-      />
-      <span class="whitespace-nowrap">{{ role.name }}</span>
-    </div>
+      <div v-for="role in allRoles" :key="role.id" class="flex items-center gap-2">
+        <input
+          type="radio"
+          :value="role.id"
+          v-model="selectedRole"
+          name="role"
+        />
+        <span class="whitespace-nowrap">{{ role.name }}</span>
+      </div>
     </div>
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
@@ -110,14 +122,41 @@
       </button>
     </div>
   </ModalOptions>
-  <ModalOptions v-model="modalPermissions" title="Editar Perfil">
-    <div class="grid-max-2 gap-4 mb-2">
+  <ModalOptions v-model="modalPermissions" title="Permisos">
+    <div class="grid-max-4 gap-4 mb-2">
+      <div
+        v-for="permission in allPermissions"
+        :key="permission.id"
+        class="flex items-center gap-2"
+      >
+        <input
+          type="checkbox"
+          :value="permission.id"
+          v-model="selectedPermissions"
+          class="rounded text-blue-600 focus:ring-blue-500"
+        />
+        <span class="whitespace-nowrap">
+          {{ permission.name }}
+        </span>
+      </div>
     </div>
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
     </div>
     <div v-if="success" class="mt-2 mb-1">
       <p class="text-lime-700">{{ success }}</p>
+    </div>
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="editPermission()"
+        class="bcb-modal bg-sky-800">
+        Guardar
+      </button>
+      <button 
+        @click="success ? closeAndGetUsers(3) : closeModal(3)"
+        class="bcb-modal bg-sky-800">
+        Salir
+      </button>
     </div>
   </ModalOptions>
   <SplashScreen :isLoadingSS="loading" />
@@ -131,62 +170,85 @@
   const titleStore = useTitleStore();
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpoint = import.meta.env.VITE_PROFILES;
-  const modalEdit = ref(false);
+  const password = import.meta.env.VITE_GENERAL_PASS;
+  const userFlag = ref(0);
+  const modalAddEdit = ref(false);
   const modalRoles = ref(false);
   const modalPermissions = ref(false);
   const loading = ref(false);
   const success = ref(null);
   const error = ref(null);
   const userId = ref(null);
-  const roleSelected = ref(null);
+  const selectedRole = ref(null);
+  const selectedPermissions = ref([]);
   const users = ref([]);
-  const roles = ref([]);
-  const permissions = ref([]);
+  const allRoles = ref([]);
+  const allPermissions = ref([]);
   const formUser = ref({
     'name':'',
     'last_name':'',
     'email':''
   });
-  titleStore.setColorTitle('Perfiles', 'sky-900');
+
+  titleStore.setColorTitle('Usuarios', 'sky-900');
   
   //  Functions
+  const openModalAdd = () => {
+    setFormUser();
+    userFlag.value = 0;
+    modalAddEdit.value = true;
+  }
   const openModalEdit = (index) => {
-    const user = users.value[index];
-    userId.value = user.id;
+    setFormUser();
+    const user = getUser(index);
+    userFlag.value = 1;
     formUser.value.name = user.name;
     formUser.value.last_name = user.last_name;
     formUser.value.email = user.email;
-    modalEdit.value = true;
+    modalAddEdit.value = true;
   }
   const openModalRoles = (index) => {
-    const user = users.value[index];
-    userId.value = user.id;
-    roleSelected.value = user.roles.length > 0 ? user.roles[0].id : null;
+    const user = getUser(index);
+    selectedRole.value = user.roles.length > 0 ? user.roles[0].id : null;
     modalRoles.value = true;
   }
   const openModalPermissions = (index) => {
-    alert(index);
+    const user = getUser(index);
+    const userPerms = user.permissions || [];
+    selectedPermissions.value = userPerms.map(p => p.id);
+    modalPermissions.value = true;
   }
   const closeModal = (option) => {
     setInitValues(0);
     if (option==1) {
-      modalEdit.value = false;
+      modalAddEdit.value = false;
       setFormUser();
     }
     else if (option==2) {
-      roleSelected.value = null;
+      selectedRole.value = null;
       modalRoles.value = false;
+    }
+    else{
+      selectedPermissions.value = null;
+      modalPermissions.value = false;
     }
   }
   const closeAndGetUsers = (option) => {
     closeModal(option);
     getProfiles();
   }
-  const editUser = async () => {
+  const addEditUser = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpoint}/${userId.value}`;
+    const body = formUser;
+    const method = userFlag.value==0 ? 'post' : 'put';
+    const url = userFlag.value==0 ? 
+      `${apiBaseUrl}${endpoint}` :
+      `${apiBaseUrl}${endpoint}/${userId.value}`;
+
+    userFlag.value==0 ? body.value.password=password : NULL ; 
+    
     try {
-      const response = await axios.put(url, formUser.value, {
+      const response = await axios[method](url, body.value, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -196,22 +258,24 @@
         success.value = response.data.message;
       }
       else {
-        error.value = "Error al actualizar el perfil.";
+        error.value = userFlag.value==0 ? 
+        "Error al agregar el usuario." : 
+        "Error al actualizar el perfil.";
       }
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar editar el perfil.';
+      error.value = e.response?.data?.message ||
+      'Ha ocurrido un error en el sistema. por favor intentelo más tarde.';
     } 
     finally {
       loading.value = false;
     }
   }
-
   const editRole = async () => {
     setInitValues(1);
     const form = ref({
       'user_id':userId.value,
-      'role_id':roleSelected.value
+      'role_id':selectedRole.value
     })
     const url = `${apiBaseUrl}${endpoint}/update-role`;
     try {
@@ -225,7 +289,35 @@
         success.value = response.data.message;
       }
       else {
-        error.value = "Error al actualizar el perfil.";
+        error.value = "Error al actualizar el rol del usuario.";
+      }
+    } 
+    catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar editar el perfil.';
+    } 
+    finally {
+      loading.value = false;
+    }
+  }
+  const editPermission = async () => {
+    setInitValues(1);
+    const form = ref({
+      'user_id':userId.value,
+      'permissions_id':selectedPermissions.value
+    })
+    const url = `${apiBaseUrl}${endpoint}/update-permissions`;
+    try {
+      const response = await axios.post(url, form.value, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      if (response.status == 200) {
+        success.value = response.data.message;
+      }
+      else {
+        error.value = "Error al actualizar los permisos del usuario.";
       }
     } 
     catch (e) {
@@ -236,6 +328,7 @@
     }
   }
 
+  //  Setters
   const setFormUser = () => {
     userId.value = null;
     formUser.value.name = "";
@@ -246,6 +339,12 @@
     loading.value = option==1 ? true : false;
     error.value = null;
     success.value = null;
+  }
+  //  Getters
+  const getUser = (index) => {
+    const user = users.value[index];
+    userId.value = user.id;
+    return user;
   }
 
   //  Init functions
@@ -259,8 +358,8 @@
         },
       });
       users.value = response.data.users;
-      roles.value = response.data.roles;
-      permissions.value = response.data.permissions;
+      allRoles.value = response.data.roles;
+      allPermissions.value = response.data.permissions;
     } 
     catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar los perfiles';
@@ -270,6 +369,7 @@
     }
   } 
 
+  //  Hooks
   onMounted(async () => {
     await getProfiles();
   });

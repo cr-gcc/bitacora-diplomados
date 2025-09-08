@@ -49,13 +49,22 @@
               role="menu"
             >
               <div class="p-2">
-                <div>
-                  <RouterLink :to="'/perfiles'"
+                <div v-if="auth.user.roles[0].name == 'admin'">
+                  <RouterLink :to="'/usuarios'"
                     class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                     role="menuitem"
                   >
-                    Perfiles
+                    Usuarios
                   </RouterLink>
+                </div>
+                <div>
+                  <button
+                    @click="openModalEdit()"
+                    class="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"
+                    role="menuitem"
+                  >
+                    Mi Perfil
+                  </button>
                 </div>
                 <div>
                   <button
@@ -122,22 +131,67 @@
       </div>
     </div>
   </header>
+  <ModalOptions v-model="modalEdit" title="Perfil">
+    <div class="grid-max-3 gap-4 mb-2">
+      <div>
+        <span class="whitespace-nowrap">Nombre</span>
+        <input v-model="formUser.name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Apellidos</span>
+        <input v-model="formUser.last_name" type="text" class="base-input-gray"/>
+      </div>
+      <div>
+        <span class="whitespace-nowrap">Email</span>
+        <input v-model="formUser.email" type="email" class="base-input-gray"/>
+      </div>
+    </div>
+    <div v-if="error" class="mt-2 mb-1">
+      <p class="text-red-700">{{ error }}</p>
+    </div>
+    <div v-if="success" class="mt-2 mb-1">
+      <p class="text-lime-700">{{ success }}</p>
+    </div>
+    <div class="flex justify-end gap-1">
+      <button 
+        @click="editUser()"
+        class="bcb-modal bg-sky-800">
+        Guardar
+      </button>
+      <button 
+        @click="closeModalEdit()"
+        class="bcb-modal bg-sky-800">
+        Salir
+      </button>
+    </div>
+  </ModalOptions>
   <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '@/stores/useAuthStore';
+  import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
-  
+
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
+  const endpoint = import.meta.env.VITE_PROFILES;
   const auth = useAuthStore();
   const router = useRouter();
-  const loading = ref(false);
   const userMenu = ref(false);
-  const userMenuRef = ref(null);
+  const modalEdit = ref(false);
   const mobileUserMenu = ref(false);
+  const loading = ref(false);
+  const success = ref(null);
+  const error = ref(null);
+  const userMenuRef = ref(null);
+  const userId = ref(null);
   const mobileUserMenuRef = ref(null);
+  const formUser = ref({
+    'name':'',
+    'last_name':'',
+    'email':''
+  });
 
   //  Functions
   const toggleUserMenu = () => {
@@ -152,14 +206,77 @@
   const closeMobileUserMenu = () => {
     mobileUserMenu.value = false;
   };
-  const handleClickOutside = (event) => {
-    if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
+  const handleClick = (event) => {
+    const menu = userMenuRef.value;
+
+    if (!menu) return;
+
+    // Caso 1: click fuera del contenedor → cerrar
+    if (!menu.contains(event.target)) {
       userMenu.value = false;
     }
-    if (mobileUserMenuRef.value && !mobileUserMenuRef.value.contains(event.target)) {
-    mobileUserMenu.value = false;
-  }
+
+    // Caso 2: click dentro del dropdown (pero no en el botón)
+    const dropdown = menu.querySelector('[role="menu"]');
+    if (dropdown && dropdown.contains(event.target)) {
+      userMenu.value = false;
+    }
   };
+
+
+
+  const openModalEdit = async () => {
+    loading.value = true;
+    const url = '/me';
+    try {
+      const response = await api.get(url);
+      if (response.status == 200) {
+        userId.value = response.data.id;
+        formUser.value.name = response.data.name;
+        formUser.value.last_name = response.data.last_name;
+        formUser.value.email = response.data.email;
+        modalEdit.value = true;
+      }
+      else {
+        alert("No se pudo consultar el perfil del usuario. Intentelo más tarde.");
+      }
+    } 
+    catch (e) {
+      alert("Error al consultar el perfil del usuario.");
+    } 
+    finally {
+      loading.value = false;
+    }
+  }
+  const editUser = async () => {
+    loading.value = true;
+    const url = `${endpoint}/${userId.value}`;
+    try {
+      const response = await api.put(url, formUser.value);
+      if (response.status == 200) {
+        success.value = response.data.message;
+      }
+      else {
+        error.value = "Error al actualizar el perfil del usuario.";
+      }
+    }
+    catch (e) {
+      error.value = e.response?.data?.message ||
+      'Ha ocurrido un error en el sistema. por favor intentelo más tarde.';
+    } 
+    finally {
+      loading.value = false;
+    }
+  }
+  const closeModalEdit = () => {
+    modalEdit.value = false;
+    userId.value = null;
+    success.value = null;
+    error.value = null;
+    formUser.value.name = '';
+    formUser.value.last_name = '';
+    formUser.value.email = '';
+  }
   const logout = async () => {
     try {
       loading.value = true;
@@ -174,14 +291,14 @@
       router.push('/login');
     }
   }
-
+  
   //  Hooks
   onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-
+    document.addEventListener("click", handleClick);
   });
+
   onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener("click", handleClick);
   });
   
 </script>
