@@ -330,11 +330,10 @@
   import { useRoute } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
-  import axios from 'axios';
+  import api from '@/plugins/axios';
   // Data
   const route = useRoute();
   const slug = route.params.slug;
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
   const endpointProfessors = import.meta.env.VITE_PROFESSORS;
   const endpointModules = import.meta.env.VITE_MODULES;
@@ -409,14 +408,10 @@
   }
   const openModalReview = async (id) => {
     setInitValues(1);
-    const urlReview = `${apiBaseUrl}${endpointReviews}/${id}`;
+    const url= `${endpointReviews}/${id}`;
     reviewId.value = id;
     try {
-      const response = await axios.get(urlReview, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       loading.value = false;
       if (response.status == 200) {
         review.value.course_id = response.data.course_id;
@@ -486,13 +481,9 @@
       form.value = {'all':true};
     }
     //
-    const urlGroup = `${apiBaseUrl}${endpointGroups}/${certificate.value.id}/search`;
+    const url = `${endpointGroups}/${certificate.value.id}/search`;
     try {
-      const response = await axios.post(urlGroup, form.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.post(url, form.value);
       groups.value = response.data;
       error.value = groups.value.length > 0 
         ? null 
@@ -507,19 +498,14 @@
   };
   const addEditGroupCourse = async () => {
     setInitValues(1);
-    const urlGroups = `${apiBaseUrl}${endpointGroups}`;
-    const urlCourses = course.value ? `${apiBaseUrl}${endpointCourses}/${course.value.id}` : null;
+    const urlGroups = `${endpointGroups}`;
+    const urlCourses = course.value ? `${endpointCourses}/${course.value.id}` : null;
     const method = courseFlag.value === 0 ? 'post' : 'put';
     const body = courseFlag.value === 0 ? form.value : course.value;
-    const finalUrl = courseFlag.value === 0 ? urlGroups : urlCourses;
+    const url = courseFlag.value === 0 ? urlGroups : urlCourses;
 
     try {
-      const response = await axios[method](finalUrl, body, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api[method](url, body);
       if (response.status == 200) {
         success.value = response.data.message;
       }
@@ -533,13 +519,9 @@
   }
   const getCourse = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointCourses}/${courseId.value}`;
+    const url = `${endpointCourses}/${courseId.value}`;
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       course.value = response.data;
     } 
     catch (e) {
@@ -556,13 +538,9 @@
     }
     else {
       setInitValues(1);
-      const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
+      const url = `${endpointGroups}/${groupId.value}`;
       try {
-        const response = await axios.delete(url, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
+        const response = await api.delete(url);
         if (response.status == 200) {
           success.value = response.data.message;
         }
@@ -577,14 +555,9 @@
   };
   const editGroup = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointGroups}/${groupId.value}`;
+    const url = `${endpointGroups}/${groupId.value}`;
     try {
-        const response = await axios.put(url, formEdit.value, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-        });
+        const response = await api.put(url, formEdit.value);
         if (response.status == 200) {
           success.value = response.data.message;
         }
@@ -601,17 +574,12 @@
   }
   const createReview = async (id) => {
     setInitValues(1);
-    const urlReview = `${apiBaseUrl}${endpointReviews}`;
+    const url = `${endpointReviews}`;
     const body = ref({
       'course_id':id
     });
     try {
-      const response = await axios.post(urlReview, body.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api.post(url, body.value);
       if (response.status == 200) {
         success.value = response.data.message;
         alert(success.value);
@@ -628,14 +596,9 @@
   }
   const editReview = async () => {
     setInitValues(1);
-    const urlReview = `${apiBaseUrl}${endpointReviews}/${reviewId.value}`;
+    const url = `${endpointReviews}/${reviewId.value}`;
     try {
-      const response = await axios.put(urlReview, review.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api.put(url, review.value);
       if (response.status == 200) {
         success.value = response.data.message;
       }
@@ -655,13 +618,9 @@
   //  Init functions
   const getCertificate = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointCertificate}/${slug}`;
+    const url = `${endpointCertificate}/${slug}`;
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       certificate.value = response.data;
     } 
     catch (e) {
@@ -672,13 +631,9 @@
     }
   };
   const getActiveProfessors = async () => {
-    const url = `${apiBaseUrl}${endpointProfessors}`;
+    const url = `${endpointProfessors}/by-status/1`;
     try {
-      const response = await axios.get(`${url}/by-status/1`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       professors.value = response.data; 
     } 
     catch (e) {
@@ -686,7 +641,7 @@
     }
   }
   const getModules = async () => {
-    const url = `${apiBaseUrl}${endpointModules}`;
+    const url = `${endpointModules}`;
     try {
       const response = await axios.get(`${url}/by-certificate/${certificate.value.id}`, {
         headers: {
