@@ -38,6 +38,9 @@
       </button>
     </div>
   </div>
+  <div v-if="error" class="mt-2 mb-1">
+    <p class="text-red-700">{{ error }}</p>
+  </div>
   <div v-if="professors.length>0" class="bg-gray-300 px-4 py-2 text-sm">
     <div class="overflow-x-auto">
       <table class="table-auto w-full min-w-max">
@@ -67,8 +70,10 @@
             <td class="px-1">{{ prof.user }}</td>
             <td class="px-1">{{ prof.password }}</td>
             <td class="px-1">
-              <button class="bcb-auto bg-sky-900" @click="getProfessorInArray(prof.id)">
-                <i class="fa-solid fa-address-card mr-1"></i>
+              <button 
+                class="bo-mini mb-1 bg-sky-900" 
+                @click="getProfessorInArray(prof.id)">
+                  <i class="fa-solid fa-address-card mr-1"></i>
                 Ver registro
               </button>
             </td>
@@ -179,11 +184,9 @@
   import { ref } from 'vue'; 
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
-  import axios from 'axios';
+  import api from '@/plugins/axios';
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpoint = import.meta.env.VITE_PROFESSORS;
-  const url = `${apiBaseUrl}${endpoint}`;
   const titleStore = useTitleStore();
   const loading = ref(false);
   const isModalOpen = ref(false);
@@ -206,15 +209,12 @@
   titleStore.setColorTitle('Profesores', 'sky-900');
 
   const getAllProfessors = async () => {
+    setInitValues(1);
     professors.value = [];
-    loading.value = true;
-    error.value = null;
+    const url = `${endpoint}`;
+    
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       professors.value = response.data; 
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar los profesores';
@@ -238,15 +238,22 @@
   };
 
   const getProfessor = async (id) => {
-    loading.value = true;
-    error.value = null;
+    setInitValues(1);
+    const url = `${endpoint}/${id}`;
+
     try {
-      const response = await axios.get(`${url}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      professor.value = response.data; 
+      const response = await api.get(url);
+      if (response.status == 200) {
+        if (response.data.length>0) {
+          professors.value = response.data; 
+        }
+        else {
+          error.value = "No se encontraron registros con este parámetro.";
+        }
+      } 
+      else {
+        error.value = "Error de busqueda de profesor.";
+      }
     } catch (e) {
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
@@ -255,15 +262,23 @@
   };
 
   const getProfessorsByStatus = async (status) => {
-    loading.value = true;
-    error.value = null;
+    setInitValues(1);
+    const url = `${endpoint}/by-status/${status}`;
+
     try {
-      const response = await axios.get(`${url}/by-status/${status}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      professors.value = response.data; 
+      const response = await api.get(url);
+      if (response.status == 200) {
+        if (response.data.length>0) {
+          professors.value = response.data; 
+        }
+        else {
+          const msg = status==0 ? 'Inactivo' : 'Activo' ;
+          error.value = `No se encontraron registros con el estatus "${msg}"`;
+        }
+      }
+      else {
+        error.value = "Error";
+      }
     } catch (e) {
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
@@ -272,10 +287,9 @@
   };
 
   const closeProfessor = () => {
+    setInitValues(0);
     isModalOpen.value = false;
     professor.value = null;
-    error.value = null;
-    success.value = null;
   }
 
   const addProfessor = () => {
@@ -284,25 +298,19 @@
   };
 
   const sendProfessor = async () => {
-    loading.value = true;
-    error.value = null;
-    success.value = null;
+    setInitValues(1);
     const method = professorFlag.value === 0 ? 'post' : 'put';
     const body = professorFlag.value === 0 ? form.value : professor.value;
-    const finalUrl = professorFlag.value === 0 ? url : `${url}/${professor.value.id}`;
+    const url = professorFlag.value === 0 ? endpoint : `${endpoint}/${professor.value.id}`;
+
     try {
-      const response = await axios[method](finalUrl, body, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await api[method](url, body);
       if (response.status == 200) {
         success.value = response.data.message+". Por favor consulte los profesores para verificar los cambios.";
       }
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar los certificados';
+      error.value = e.response?.data?.message || 'Error al agregar el profesor.';
     } 
     finally {
       loading.value = false;    
@@ -310,17 +318,21 @@
   };
 
   const searchProfessor = async () => {
-    loading.value = true;
-    const finalUrl = ref(`${url}/search`);
-    const body = ref({info:info.value});
+    setInitValues(1);
+    professors.value = [];
+    const url = `${endpoint}/search`;
+    const body = {info:info.value};
+
     try {
-      const response = await axios.post(finalUrl.value, body.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+      const response = await api.post(url, body);
+      if (response.status == 200) {
+        if (response.data.length>0) {
+          professors.value = response.data; 
         }
-      });
-      professors.value = response.data; 
+        else {
+          error.value = "No se encontraron registros con este parámetro.";
+        }
+      }
     } 
     catch (e) {
       error.value = e.response?.data?.message || 'Error al buscar profesores';
@@ -329,5 +341,11 @@
       loading.value = false;    
     }
   };
+
+  const setInitValues = (option) => {    
+    loading.value = option==1 ? true : false;
+    error.value = null;
+    success.value = null;
+  }
 
 </script>
