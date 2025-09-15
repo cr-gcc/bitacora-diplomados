@@ -174,7 +174,7 @@
       <button 
         @click="closeProfessor()"
         class="bcb-modal bg-sky-800">
-        Aceptar
+        Salir
       </button>
     </div>
   </ModalOptions>

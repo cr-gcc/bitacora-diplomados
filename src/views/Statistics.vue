@@ -40,9 +40,6 @@
       Buscar
     </button>
   </div>
-  <div v-if="error" class="mt-2 mb-1">
-    <p class="text-red-700">{{ error }}</p>
-  </div>
   <div v-if="courses" class="bg-gray-300 px-4 py-2 text-sm">
     <div class="overflow-x-auto">
       <table class="table-auto w-full min-w-max">
@@ -92,15 +89,17 @@
       </table>
     </div>
   </div>
+  <div v-if="error" class="mt-2 mb-1">
+    <p class="text-red-700">{{ error }}</p>
+  </div>
   <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { onMounted,ref } from 'vue'; 
   import { useTitleStore } from '@/stores/useTitleStore';
-  import axios from 'axios';
+  import api from '@/plugins/axios';
 
   const titleStore = useTitleStore();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpointCertificate = import.meta.env.VITE_CERTIFICATES
   const endpointStatistics= import.meta.env.VITE_STATISTICS;
   const certificates = ref(null);
@@ -117,20 +116,13 @@
   titleStore.setColorTitle('Estadisticas', 'sky-900');
 
   //  Functions
-  const setInitValues = (option) => {    
-    loading.value = option==1 ? true : false;
-    error.value = null;
-  }
   const searchData = async () => {
-    courses.value = null;
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointStatistics}/courses`;
+    courses.value = null;
+    const url = `${endpointStatistics}/courses`;
+    
     try {
-      const response = await axios.post(url, search.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.post(url, search.value);
       if (response.data.length) {
         courses.value = response.data;  
       }
@@ -146,19 +138,13 @@
     }
   }
   const downloadData = async () => {
-    courses.value = null;
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointStatistics}/courses/download`;
+    courses.value = null;
+    const url = `${endpointStatistics}/courses/download`;
+    
     try {
-      const response = await axios.post(url, search.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        responseType: 'blob',   
-      });
-      
+      const response = await api.post(url, search.value, {responseType: 'blob'});
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
-      // Nombre dinámico si el backend lo manda en el header
       const contentDisposition = response.headers['content-disposition'];
       let fileName = 'courses.xlsx';
       if (contentDisposition) {
@@ -167,7 +153,6 @@
           fileName = match[1];
         }
       }
-      // Disparar descarga automática
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
@@ -181,17 +166,18 @@
       loading.value = false;
     }
   }
+  const setInitValues = (option) => {    
+    loading.value = option==1 ? true : false;
+    error.value = null;
+  }
 
   //  Init functions
   const getCertificate = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpointCertificate}`;
+    const url = `${endpointCertificate}`;
+
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       certificates.value = response.data;
     } 
     catch (e) {
