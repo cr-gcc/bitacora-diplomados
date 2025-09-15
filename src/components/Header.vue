@@ -49,14 +49,6 @@
               role="menu"
             >
               <div class="p-2">
-                <div v-if="auth.user.roles[0].name == 'admin'">
-                  <RouterLink :to="'/usuarios'"
-                    class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                    role="menuitem"
-                  >
-                    Usuarios
-                  </RouterLink>
-                </div>
                 <div>
                   <button
                     @click="openModalEdit()"
@@ -65,6 +57,14 @@
                   >
                     Mi Perfil
                   </button>
+                </div>
+                <div v-if="auth.user.roles[0].name == 'admin'">
+                  <RouterLink :to="'/usuarios'"
+                    class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+                    role="menuitem"
+                  >
+                    Usuarios
+                  </RouterLink>
                 </div>
                 <div>
                   <button
@@ -208,23 +208,16 @@
   };
   const handleClick = (event) => {
     const menu = userMenuRef.value;
-
     if (!menu) return;
-
-    // Caso 1: click fuera del contenedor → cerrar
     if (!menu.contains(event.target)) {
       userMenu.value = false;
     }
 
-    // Caso 2: click dentro del dropdown (pero no en el botón)
     const dropdown = menu.querySelector('[role="menu"]');
     if (dropdown && dropdown.contains(event.target)) {
       userMenu.value = false;
     }
   };
-
-
-
   const openModalEdit = async () => {
     loading.value = true;
     const url = '/me';
@@ -296,7 +289,6 @@
   onMounted(() => {
     document.addEventListener("click", handleClick);
   });
-
   onBeforeUnmount(() => {
     document.removeEventListener("click", handleClick);
   });
