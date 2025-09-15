@@ -165,10 +165,9 @@
   import { onMounted, ref } from 'vue';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
-  import axios from 'axios';
+  import api from '@/plugins/axios';
 
   const titleStore = useTitleStore();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpoint = import.meta.env.VITE_PROFILES;
   const password = import.meta.env.VITE_GENERAL_PASS;
   const userFlag = ref(0);
@@ -241,19 +240,12 @@
     setInitValues(1);
     const body = formUser;
     const method = userFlag.value==0 ? 'post' : 'put';
-    const url = userFlag.value==0 ? 
-      `${apiBaseUrl}${endpoint}` :
-      `${apiBaseUrl}${endpoint}/${userId.value}`;
+    const url = userFlag.value==0 ? `${endpoint}` : `${endpoint}/${userId.value}`;
 
-    userFlag.value==0 ? body.value.password=password : NULL ; 
+    userFlag.value==0 ? body.value.password=password : "" ; 
     
     try {
-      const response = await axios[method](url, body.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-      });
+      const response = await api[method](url, body.value);
       if (response.status == 200) {
         success.value = response.data.message;
       }
@@ -277,14 +269,9 @@
       'user_id':userId.value,
       'role_id':selectedRole.value
     })
-    const url = `${apiBaseUrl}${endpoint}/update-role`;
+    const url = `${endpoint}/update-role`;
     try {
-      const response = await axios.post(url, form.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-      });
+      const response = await api.post(url, form.value);
       if (response.status == 200) {
         success.value = response.data.message;
       }
@@ -305,14 +292,9 @@
       'user_id':userId.value,
       'permissions_id':selectedPermissions.value
     })
-    const url = `${apiBaseUrl}${endpoint}/update-permissions`;
+    const url = `${endpoint}/update-permissions`;
     try {
-      const response = await axios.post(url, form.value, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-      });
+      const response = await api.post(url, form.value);
       if (response.status == 200) {
         success.value = response.data.message;
       }
@@ -350,13 +332,9 @@
   //  Init functions
   const getProfiles = async () => {
     setInitValues(1);
-    const url = `${apiBaseUrl}${endpoint}`;
+    const url = `${endpoint}`;
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       users.value = response.data.users;
       allRoles.value = response.data.roles;
       allPermissions.value = response.data.permissions;
