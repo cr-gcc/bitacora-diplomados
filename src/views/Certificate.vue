@@ -487,7 +487,7 @@
       groups.value = response.data;
       error.value = groups.value.length > 0 
         ? null 
-        : 'No se encontraron grupos con este código';
+        : 'No se encontraron registros del grupo';
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar el/los grupo.';
     } finally {
@@ -641,17 +641,13 @@
     }
   }
   const getModules = async () => {
-    const url = `${endpointModules}`;
+    const url = `${endpointModules}/by-certificate/${certificate.value.id}`;
     try {
-      const response = await axios.get(`${url}/by-certificate/${certificate.value.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       modules.value = response.data; 
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error consultar los módulos';
+      error.value = e.response?.data?.message || 'Error al consultar los módulos';
     }
   }
 
