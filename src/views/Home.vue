@@ -23,12 +23,11 @@
 </template>
 <script setup>
   import { ref, onMounted } from 'vue';
-  import axios from 'axios';
   import { useTitleStore } from '@/stores/useTitleStore';
+  import api from '@/plugins/axios';
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const endpoint = import.meta.env.VITE_CERTIFICATES;
-  const url = `${apiBaseUrl}${endpoint}`;
+  const url = `${endpoint}`;
   const titleStore = useTitleStore();
   const certificates = ref([]);
   const loading = ref(false);
@@ -40,11 +39,7 @@
     loading.value = true;
     error.value = null;
     try {
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.get(url);
       certificates.value = response.data; 
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar los certificados';
