@@ -90,6 +90,7 @@
                 <th class="text-left">Módulo</th>
                 <th class="text-left">Diplomado</th>
                 <th class="text-left">Profesor</th>
+                <th class="text-left">Revisión</th>
                 <th class="text-left">Opciones</th>
               </tr>
             </thead>
@@ -98,13 +99,27 @@
                 <td class="py-1">{{ course.start_date }}</td>
                 <td class="py-1">{{ course.end_date }}</td>
                 <td class="py-1">{{ course.module.number }}</td>
-                <td class="py-1">{{ course.module.name }}</td>
+                <td class="py-1">{{ truncate(course.module.name) }}</td>
                 <td class="py-1">
                   {{ 
                     course.professor ? 
                     course.professor.name+"  "+course.professor.last_name : 
                     "Sin asignación" 
                   }}  
+                </td>
+                <td class="py-1">
+                  <span 
+                    v-if="course.review && course.review.dates === 1"
+                    class="text-lime-600 font-semibold"
+                  >
+                    Si
+                  </span>
+                  <span 
+                    v-else
+                    class="text-red-500 font-semibold"
+                  >
+                    No
+                  </span>
                 </td>
                 <td class="py-1">
                   <button 
@@ -318,7 +333,7 @@
       <button 
         @click="success ? closeAndGetGroups(3) : closeModal(3)"
         class="bcb-modal bg-sky-800">
-        Aceptar
+        Salir
       </button>
     </div>
   </ModalOptions>
@@ -330,6 +345,7 @@
   import { useRoute } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
+  import { truncate } from '@/utils/strTruncate';
   import api from '@/plugins/axios';
   // Data
   const route = useRoute();
@@ -378,7 +394,6 @@
     'repeaters':'',
     'comments':'',
   });
-
   //  Observers
   const totalStudentsRepeaters = computed(() => review.value.students + review.value.repeaters);
   watch(() => certificate.value, (newVal) => {
