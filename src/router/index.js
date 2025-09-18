@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "@/views/Login.vue";
 import Home from "@/views/Home.vue";
+import Certificates from "@/views/Certificates.vue";
 import Certificate from "@/views/Certificate.vue";
 import Professors from "@/views/Professors.vue";
 import Statistics from "@/views/Statistics.vue";
@@ -31,7 +32,7 @@ const routes = [
   },
   {
     path: "/diplomados",
-    component: Home,
+    component: Certificates,
     meta: {
       requiresAuth: true,
     },
