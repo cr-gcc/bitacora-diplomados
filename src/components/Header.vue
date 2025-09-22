@@ -9,6 +9,12 @@
           <nav aria-label="Global" class="hidden md:block">
             <ul class="flex items-center gap-6 text-md">
               <li>
+                <RouterLink :to="'/'" class="text-gray-300 transition hover:text-white"
+                >
+                  Home
+                </RouterLink>
+              </li>
+              <li>
                 <RouterLink :to="'/diplomados'" class="text-gray-300 transition hover:text-white"
                 >
                   Diplomados

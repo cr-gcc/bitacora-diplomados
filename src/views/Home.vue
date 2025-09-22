@@ -1,9 +1,19 @@
 <template>
-  <h3 class="text-3xl text-red-700 font-semibold mb-2">Fechas Promesa Venta</h3>
-  <div class="bg-gray-100 flex justify-center h-screen">
-    <div class="w-full mx-auto p-4">
+  <div class="flex justify-end gap-4">
+    <div class="flex items-center gap-1">
+      <p>Fecha Actual <i class="fa-solid fa-square text-sky-900"></i></p>
+    </div>
+    <div class="flex items-center gap-1">
+      <p>Inicio Cursos <i class="fa-solid fa-square text-gray-700"></i></p>
+    </div>
+  </div>
+  <div v-if="error" class="mb-2">
+    <p class="text-red-700">{{ error }}</p>
+  </div>
+  <div class="flex justify-center h-screen">
+    <div class="w-full mx-auto">
       <div class="bg-white shadow-lg overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-3 bg-red-700">
+        <div class="flex items-center justify-between px-6 py-3 bg-sky-900">
           <button @click="prevMonth()" class="text-white cursor-pointer">
             <i class="fa-solid fa-arrow-left"></i>
           </button>
@@ -18,13 +28,13 @@
           </div>
           <div v-for="n in firstDayOfWeek" :key="'empty-' + n"></div>
           <template v-for="day in daysInMonth" :key="'day-'+day">
-            <div v-if="isPromiseDate(day)" class="calendar-frame bg-gray-800 text-white cursor-pointer" @click="selectDate(day)">
+            <div v-if="isPromiseDate(day)" class="calendar-frame bg-gray-700 text-white cursor-pointer" @click="openModal(day)">
               {{ day }}
             </div>
-            <div v-else-if="isToday(day)" class="calendar-frame bg-red-600 text-white" >
+            <div v-else-if="isToday(day)" class="calendar-frame bg-sky-900 text-white" >
               {{ day }}
             </div>
-            <div v-else class="calendar-frame text-red-600">
+            <div v-else class="calendar-frame text-sky-900">
               {{ day }}
             </div>
           </template>
@@ -32,72 +42,106 @@
       </div>
     </div>
   </div>
-  <ModalMsg :modalMsg="showModal" :modalMsgTitle="titleModal" @close="showModal=false">
-    <div class="mb-2">
-      <p>
-        <span class="font-semibold">Campaña:</span> Nomina
-      </p>
-      <p>
-        <span class="font-semibold">Responsable:</span> Carlos Hernandez
-      </p>
-      <p>
-        <span class="font-semibold">Fecha de venta:</span> 5/06/2025
-      </p>
-      <div class="pt-1 border-b-2 border-red-800"></div>
+  <ModalOptions v-model="modalCertificates" title="Diplomados">
+    <div class="max-h-[400px] overflow-auto mb-2">
+      <table class="table-auto w-full min-w-max">
+        <thead class="text-left">
+          <tr>
+            <th class="px-1 font-bold">#</th>
+            <th class="px-1">Diplomado</th>
+            <th class="px-1">Grupo</th>
+            <th class="px-1">Módulo</th>
+            <th class="px-1">Inicio</th>
+            <th class="px-1">Fin</th>
+            <th class="px-1">Profesor</th>
+            <th class="px-1">Revisión</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-300">
+          <tr v-for="(course, ind) in courses" :key="'course'+ind" :class="'text-'+course.certificate_color">
+            <td class="font-bold">{{ ind+1 }}</td>
+            <td class="px-1">{{ course.certificate_short_name }}</td>
+            <td class="px-1">{{ course.group_code }}</td>
+            <td class="px-1">{{ course.module_number }}</td>
+            <td class="px-1">{{ course.start_date }}</td>
+            <td class="px-1">{{ course.end_date }}</td>
+            <td class="px-1">
+              {{ 
+                course.professor_name ? 
+                course.professor_name+"  "+course.professor_last_name : 
+                "Sin profesor asignado" 
+              }}
+            </td>
+            <td class="px-1">
+              {{
+                course.study_plan ?
+                "SI" :
+                "No"
+              }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="mb-2">
-      <p>
-        <span class="font-semibold">Campaña:</span> Nomina
-      </p>
-      <p>
-        <span class="font-semibold">Responsable:</span> Marco Luna
-      </p>
-      <p>
-        <span class="font-semibold">Fecha de venta:</span> 5/06/2025
-      </p>
-      <div class="pt-1 border-b-2 border-red-800"></div>
+    <div class="flex justify-end gap-1">
+      <button
+        @click="closeModal()"
+        class="bcb-modal bg-sky-800">
+        Salir
+      </button>
     </div>
-    <div class="mb-4">
-      <p>
-        <span class="font-semibold">Campaña:</span> Nomina
-      </p>
-      <p>
-        <span class="font-semibold">Responsable:</span> Maria Delgado
-      </p>
-      <p>
-        <span class="font-semibold">Fecha de venta:</span> 5/06/2025
-      </p>
-      <div class="pt-1 border-b-2 border-red-800"></div>
-    </div>
-  </ModalMsg>
+  </ModalOptions>
+  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
+  import { useTitleStore } from '@/stores/useTitleStore';
+  import ModalOptions from '@/components/ModalOptions.vue';
+  import api from '@/plugins/axios';
 
+  const endpointCMY = import.meta.env.VITE_CALENDAR_MY;
+  const endpointCC = import.meta.env.VITE_COURSES_CALENDAR;
+  const titleStore = useTitleStore();
   const currentDate = new Date();
   const year = ref(currentDate.getFullYear());
   const month = ref(currentDate.getMonth());
-	/*
-	const day = String(currentDate.getDate()).padStart(2, '0');
-	const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${day}`;
-	*/
-  const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
-  /*const selectedDate = ref(null);*/
-  const showModal = ref(false);
-  const titleModal = ref("Ventas");
-  //const isModalOpen = ref(false);
+  const modalCertificates = ref(false);
+  const loading = ref(false);
+  const error = ref(null);
+  const daysOfWeek = [
+    'Dom', 
+    'Lun', 
+    'Mar', 
+    'Mie', 
+    'Jue', 
+    'Vie', 
+    'Sab'
+  ];
+  const startCoursesDate = ref([]);
+  const courses = ref([]);
+  
+  titleStore.setColorTitle('Home', 'sky-900');
 
   const firstDayOfWeek = computed(() => {
-    return new Date(year.value, month.value, 1).getDay()
+    return new Date(year.value, month.value, 1).getDay();
   });
 
   const daysInMonth = computed(() => {
-    return new Date(year.value, month.value + 1, 0).getDate()
+    return new Date(year.value, month.value + 1, 0).getDate();
   });
 
   const monthName = computed(() => {
     return new Date(year.value, month.value).toLocaleString('default', { month: 'long' })
   });
+
+  const promiseDates = computed(() => {
+    if (!startCoursesDate.value) return [];
+    return startCoursesDate.value.map(d => parseLocalDate(d));
+  });
+
+  const parseLocalDate = (dateStr) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
 
   const isToday = (day) => {
     const today = new Date();
@@ -107,63 +151,87 @@
       year.value === today.getFullYear()
     )
   };
-	// V1
-  const isPromiseDate = (day) => {
-		const reg = [
-			{ date: '2025-09-11' },
-			{ date: '2025-09-22' },
-			{ date: '2025-09-25' }
-		];
-		// convertimos cada string en Date
-		const dates = reg.map(r => new Date(r.date));
-		//
-    return dates.some(date =>
+
+	const isPromiseDate = (day) => {
+    return promiseDates.value.some(date =>
       day === date.getDate() &&
       month.value === date.getMonth() &&
       year.value === date.getFullYear()
     );
   };
-	/* V2
-		const isPromiseDate = (day) => {
-			const reg = [
-				{ id: 1, date: '2025-09-11' },
-				{ id: 2, date: '2025-09-22' },
-				{ id: 3, date: '2025-09-25' },
-			];
-			// construimos la fecha que recibimos
-			const checkDate = new Date(year.value, month.value, day); 
-			const formatted = checkDate.toISOString().split("T")[0]; // yyyy-mm-dd
-			// buscamos si existe en reg
-			const found = reg.find(r => r.date === formatted);
-			return found ? found.id : 0;
-		};
-	*/
-	const selectDate = (day) => {
-		const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${day}`;
-		//alert(formattedDate);
-    showModal.value = true;
+
+	const openModal = async(day) => {
+    loading.value = true;
+    error.value = null;
+    courses.value = [];
+		const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+		const url = `${endpointCC}`;
+    const body = {'date':formattedDate};
+    console.log("INICIO");
+    try {
+      const response = await api.post(url, body);
+      if (response.status == 200) {
+        const data = response.data.data;
+        if (data.length) {
+          courses.value = data;
+          modalCertificates.value = true;
+        }
+        else {
+          error.value = "No se encontraron registros."
+        }
+      }
+      else{
+        console.log("AQUI");
+      }
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar los cursos.';
+      console.log(error.value);
+    } finally {
+      loading.value = false;
+    }
   };
-  /*
-    const selectedDateFormatted = computed(() => {
-      if (!selectedDate.value) return ''
-      return selectedDate.value.toLocaleDateString(undefined, {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      })
-    })
-  */
-  const prevMonth = () => {
+
+  const closeModal = () => {
+    modalCertificates.value = false;
+  }
+
+  const prevMonth = async() => {
     month.value--
     if (month.value < 0) {
       month.value = 11
       year.value--
     }
+    await getCoursesDates(); 
+    courses.value = [];
   }
 
-  const nextMonth = () => {
+  const nextMonth = async() => {
     month.value++
     if (month.value > 11) {
       month.value = 0
       year.value++
     }
+    await getCoursesDates(); 
+    courses.value = [];
 	}
+
+  const getCoursesDates = async() => {
+    loading.value = true;
+    error.value = null;
+    const url = `${endpointCMY}`;
+    const date = `${year.value}-${String(month.value + 1).padStart(2, '0')}`;
+    const body = {'month_year':date};
+    try {
+      const response = await api.post(url, body);
+      startCoursesDate.value = response.data.start_courses;
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error al cargar las fechas de inicio.';
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  onMounted(() => {
+    getCoursesDates();
+  });
 </script>
