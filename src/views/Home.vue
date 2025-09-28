@@ -42,6 +42,7 @@
       </div>
     </div>
   </div>
+
   <ModalOptions v-model="modalCertificates" title="Diplomados">
     <div class="max-h-[400px] overflow-auto mb-2">
       <table class="table-auto w-full min-w-max">
@@ -55,6 +56,7 @@
             <th class="px-1">Fin</th>
             <th class="px-1">Profesor</th>
             <th class="px-1">Revisión</th>
+            <th class="px-1">Opciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-300">
@@ -68,7 +70,7 @@
             <td class="px-1">
               {{ 
                 course.professor_name ? 
-                course.professor_name+"  "+course.professor_last_name : 
+                truncate(course.professor_name+"  "+course.professor_last_name, 30) : 
                 "Sin profesor asignado" 
               }}
             </td>
@@ -78,6 +80,17 @@
                 "SI" :
                 "No"
               }}</td>
+              <td class="px-1">
+                <a :href="router.resolve({ 
+                    path: `${course.certificate_local_url}`, 
+                    query: { code: course.group_code } 
+                  }).href" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  Revisar
+                </a>
+              </td>
           </tr>
         </tbody>
       </table>
@@ -94,12 +107,15 @@
 </template>
 <script setup>
   import { ref, onMounted, computed } from 'vue'
+  import { useRouter } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
+  import { truncate } from '@/utils/strTruncate';
   import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
 
   const endpointCMY = import.meta.env.VITE_CALENDAR_MY;
   const endpointCC = import.meta.env.VITE_COURSES_CALENDAR;
+  const router = useRouter();
   const titleStore = useTitleStore();
   const currentDate = new Date();
   const year = ref(currentDate.getFullYear());

@@ -671,5 +671,10 @@
     await getCertificate();
     getActiveProfessors();
     getModules();
+
+    if (route.query.code) {
+      code.value = route.query.code;
+      searchGroupsCourses(1);
+    }
   });
 </script>
