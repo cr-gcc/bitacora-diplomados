@@ -19,6 +19,7 @@
             <th class="px-1">Email</th>
             <th class="px-1">Contraseña</th>
             <th class="px-1">Opciones</th>
+            <th class="px-1">Accesibilidad</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-300 text-center">
@@ -35,6 +36,10 @@
                   <i class="fa-solid fa-pen mr-0.5"></i>
                   Editar
                 </button>
+              </div>
+            </td>
+            <td class="px-1 pt-1">
+              <div class="flex flex-col items-center">
                 <button 
                   @click="openModalRoles(index)"
                   class="bo-mini mb-1 bg-sky-900">
