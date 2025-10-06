@@ -90,14 +90,14 @@
                 <th class="text-left">Módulo</th>
                 <th class="text-left">Diplomado</th>
                 <th class="text-left">Profesor</th>
-                <th class="text-left">Revisión</th>
+                <th class="text-left">Visible</th>
                 <th class="text-left">Opciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
               <tr v-for="course in group.courses" :key="'indc'+course.id">
-                <td class="py-1">{{ course.start_date }}</td>
-                <td class="py-1">{{ course.end_date }}</td>
+                <td class="py-1">{{ dateFormat(course.start_date) }}</td>
+                <td class="py-1">{{ dateFormat(course.end_date) }}</td>
                 <td class="py-1">{{ course.module.number }}</td>
                 <td class="py-1">{{ truncate(course.module.name) }}</td>
                 <td class="py-1">
@@ -109,7 +109,7 @@
                 </td>
                 <td class="py-1">
                   <span 
-                    v-if="course.review && course.review.dates === 1"
+                    v-if="course.review && course.review.users_in_group === 1"
                     class="text-lime-600 font-semibold"
                   >
                     Si
@@ -155,7 +155,7 @@
   </div>
   <div v-else>
     <p>{{ error }}</p>
-  </div>  
+  </div>
   <ModalOptions v-model="modalAddGroup" title="Agregar Grupo">
     <div class="gap-4 mb-2">
       <div>
@@ -192,7 +192,6 @@
       >
         <option value="" disabled>Seleccione un estatus</option>
         <option value="active">Activo</option>
-        <option value="inactive">Inactivo</option>
         <option value="finished">Finalizado</option>
       </select>
     </div>
@@ -289,6 +288,18 @@
         </label>
       </div>
       <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Grupo con Usuarios</span>
+        <label
+          for="users_in_group"
+          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
+        >
+          <input v-model="review.users_in_group" type="checkbox" id="users_in_group" class="peer sr-only" />
+          <span
+            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
+          ></span>
+        </label>
+      </div>
+      <div class="flex items-center gap-3">
         <span class="whitespace-nowrap">Examen</span>
         <select
           v-model="review.exam"
@@ -346,6 +357,7 @@
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import { truncate } from '@/utils/strTruncate';
+  import { dateFormat } from '@/utils/dateFormat';
   import api from '@/plugins/axios';
   // Data
   const route = useRoute();
@@ -389,6 +401,7 @@
     'course_id':'',
     'study_plan':'',
     'dates':'',
+    'users_in_group':'',
     'exam':'',
     'students':'',
     'repeaters':'',
@@ -432,6 +445,7 @@
         review.value.course_id = response.data.course_id;
         review.value.study_plan = Boolean(response.data.study_plan);
         review.value.dates = Boolean(response.data.dates);
+        review.value.users_in_group = Boolean(response.data.users_in_group);
         review.value.exam = response.data.exam;
         review.value.students = response.data.students;
         review.value.repeaters = response.data.repeaters;
@@ -462,6 +476,7 @@
       review.value.course_id = "";
       review.value.study_plan = "";
       review.value.dates = "";
+      review.value.users_in_group = "";
       review.value.exam = "";
       review.value.students = "";
       review.value.repeaters = "";

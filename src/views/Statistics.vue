@@ -69,8 +69,8 @@
             </td>
             <td v-else class="px-1">Profesor no asignado</td>
             <!--Dates-->
-            <td class="px-1">{{ course.start_date }}</td>
-            <td class="px-1">{{ course.end_date }}</td>
+            <td class="px-1">{{ dateFormat(course.start_date) }}</td>
+            <td class="px-1">{{ dateFormat(course.end_date) }}</td>
             <!--Review-->
             <td v-if="course.review" class="px-1">
               {{ course.review.students }}
@@ -97,6 +97,7 @@
 <script setup>
   import { onMounted,ref } from 'vue'; 
   import { useTitleStore } from '@/stores/useTitleStore';
+  import { dateFormat } from '@/utils/dateFormat';
   import api from '@/plugins/axios';
 
   const titleStore = useTitleStore();

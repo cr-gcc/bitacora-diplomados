@@ -55,7 +55,7 @@
             <th class="px-1">Inicio</th>
             <th class="px-1">Fin</th>
             <th class="px-1">Profesor</th>
-            <th class="px-1">Revisión</th>
+            <th class="px-1">Visible</th>
             <th class="px-1">Opciones</th>
           </tr>
         </thead>
@@ -65,8 +65,8 @@
             <td class="px-1">{{ course.certificate_short_name }}</td>
             <td class="px-1">{{ course.group_code }}</td>
             <td class="px-1">{{ course.module_number }}</td>
-            <td class="px-1">{{ course.start_date }}</td>
-            <td class="px-1">{{ course.end_date }}</td>
+            <td class="px-1">{{ dateFormat(course.start_date) }}</td>
+            <td class="px-1">{{ dateFormat(course.end_date) }}</td>
             <td class="px-1">
               {{ 
                 course.professor_name ? 
@@ -76,7 +76,7 @@
             </td>
             <td class="px-1">
               {{
-                course.study_plan ?
+                course.users_in_group ?
                 "SI" :
                 "No"
               }}</td>
@@ -110,6 +110,7 @@
   import { useRouter } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
   import { truncate } from '@/utils/strTruncate';
+  import { dateFormat } from '@/utils/dateFormat';
   import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
 

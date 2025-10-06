@@ -44,31 +44,31 @@
   <div v-if="professors.length>0" class="bg-gray-300 px-4 py-2 text-sm">
     <div class="overflow-x-auto">
       <table class="table-auto w-full min-w-max">
-        <thead class="text-center">
+        <thead class="text-left">
           <tr>
             <th class="px-1 font-bold">#</th>
             <th class="px-1">Nombre</th>
             <th class="px-1">Apellidos</th>
             <th class="px-1">Email</th>
             <th class="px-1">RFC</th>
-            <th class="px-1">Estatus</th>
             <th class="px-1">Usuario</th>
             <th class="px-1">Contraseña</th>
+            <th class="px-1">Estatus</th>
             <th class="px-1">Opciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-300 text-center">
+        <tbody class="divide-y divide-gray-300">
           <tr v-for="(prof, ind) in professors" :key="'prof'+ind">
             <td class="font-bold">{{ ind+1 }}</td>
             <td class="px-1">{{ prof.name }}</td>
             <td class="px-1">{{ prof.last_name }}</td>
             <td class="px-1">{{ prof.email }}</td>
             <td class="px-1">{{ prof.rfc }}</td>
+            <td class="px-1">{{ prof.user }}</td>
+            <td class="px-1">{{ prof.password }}</td>
             <td class="px-1">
               <i class="fa-solid fa-circle" :class="prof.active ? 'text-lime-600' : 'text-red-700'"></i>
             </td>
-            <td class="px-1">{{ prof.user }}</td>
-            <td class="px-1">{{ prof.password }}</td>
             <td class="px-1">
               <button 
                 class="bo-mini mb-1 bg-sky-900" 
