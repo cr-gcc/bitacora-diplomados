@@ -1,11 +1,8 @@
 <template>
   <div class="bg-cover bg-no-repeat bg-center" :style="`background-image: url('${principalImage}');`">
-    <div class="flex justify-center h-screen">
-      <!-- Panel lateral izquierdo -->
+    <div class="flex justify-end min-h-screen">
       <div class="hidden lg:block lg:w-2/3 h-full"></div>
-
-      <!-- Panel derecho -->
-      <div class="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6 bg-black opacity-80">
+      <div class="flex items-center w-full max-w-md px-6 lg:w-2/6 lg:ml-auto bg-black/80">
         <div class="flex-1">
           <!-- Logo -->
           <div class="text-center mb-8">
@@ -72,7 +69,7 @@ import PB from '@/components/ProgressBar.vue';
 import api from '@/plugins/axios';
 
 const endpoint = import.meta.env.VITE_FORGOT_PASSWORD;
-const principalImage = 'assets/images/wallpapers/fondo.jpg';
+const principalImage = '/assets/images/wallpapers/fondo.jpg';
 const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 const pb = ref(false);
 const email = ref("");

@@ -1,9 +1,9 @@
 <template>
   <div class="bg-cover bg-no-repeat bg-center" :style="`background-image: url('${principalImage}');`">
-    <div class="flex justify-center h-screen">
+    <div class="flex justify-end min-h-screen">
       <div class="hidden lg:block lg:w-2/3 h-full">
       </div>
-      <div class="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6 bg-black opacity-80">
+      <div class="flex items-center w-full max-w-md px-6 lg:w-2/6 lg:ml-auto bg-black/80">
         <div class="flex-1">
           <div class="text-center">
             <div class="flex justify-center mx-auto">
@@ -51,7 +51,7 @@
   import PB from '@/components/ProgressBar.vue';
   import api from '@/plugins/axios';
   
-  const principalImage = 'assets/images/wallpapers/fondo.jpg';
+  const principalImage = '/assets/images/wallpapers/fondo.jpg';
   const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 
   const router = useRouter();
