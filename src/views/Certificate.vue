@@ -109,7 +109,7 @@
                 </td>
                 <td class="py-1">
                   <span 
-                    v-if="course.review && course.review.users_in_group === 1"
+                    v-if="course.review && course.review.visible === 1"
                     class="text-lime-600 font-semibold"
                   >
                     Si
@@ -192,6 +192,7 @@
       >
         <option value="" disabled>Seleccione un estatus</option>
         <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
         <option value="finished">Finalizado</option>
       </select>
     </div>
@@ -321,6 +322,20 @@
         <span class="whitespace-nowrap">Total</span>
         <input v-model="totalStudentsRepeaters" type="number" class="base-input-gray" disabled/>
       </div>
+
+      <div class="flex items-center gap-3">
+        <span class="whitespace-nowrap">Grupo Visible</span>
+        <label
+          for="visible"
+          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
+        >
+          <input v-model="review.visible" type="checkbox" id="visible" class="peer sr-only" />
+          <span
+            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
+          ></span>
+        </label>
+      </div>
+
       <div class="md:col-span-3">
         <label for="comentario">Comentario</label>
         <textarea v-model="review.comments" id="comentario"
@@ -349,6 +364,7 @@
     </div>
   </ModalOptions>
   <SplashScreen :isLoadingSS="loading" />
+  {{ review }}
 </template>
 
 <script setup>
@@ -405,6 +421,7 @@
     'exam':'',
     'students':'',
     'repeaters':'',
+    'visible':'',
     'comments':'',
   });
   //  Observers
@@ -449,6 +466,7 @@
         review.value.exam = response.data.exam;
         review.value.students = response.data.students;
         review.value.repeaters = response.data.repeaters;
+        review.value.visible = Boolean(response.data.visible);
         review.value.comments = response.data.comments;
         modalReview.value = true;
       }
@@ -480,6 +498,7 @@
       review.value.exam = "";
       review.value.students = "";
       review.value.repeaters = "";
+      review.value.visible = "";
       review.value.comments = "";
     }
     else if (option==4){

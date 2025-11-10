@@ -26,6 +26,14 @@
                 </button>
               </div>
             </form>
+            <div class="mt-2 text-center">
+              <RouterLink
+                to="/forgot-password"
+                class="text-yellow-600 hover:font-semibold text-sm"
+              >
+                Olvide mi contraseña
+              </RouterLink>
+            </div>
             <p v-if="error" class="text-red-500 mt-4">{{ error }}</p>
             <div v-if="pb" class="mt-2">
               <PB/>  
