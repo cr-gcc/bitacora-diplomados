@@ -364,7 +364,6 @@
     </div>
   </ModalOptions>
   <SplashScreen :isLoadingSS="loading" />
-  {{ review }}
 </template>
 
 <script setup>

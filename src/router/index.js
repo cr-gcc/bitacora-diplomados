@@ -70,8 +70,9 @@ const routes = [
   },
 ];
 
+const base = import.meta.env.VITE_BASE_URL || "/";
 const router = createRouter({
-  history: createWebHistory("/cedigec/bitacora-diplomados/"),
+  history: createWebHistory(base),
   routes,
 });
 

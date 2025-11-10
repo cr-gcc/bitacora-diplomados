@@ -42,7 +42,6 @@
       </div>
     </div>
   </div>
-
   <ModalOptions v-model="modalCertificates" title="Diplomados">
     <div class="max-h-[400px] overflow-auto mb-2">
       <table class="table-auto w-full min-w-max">
@@ -76,7 +75,7 @@
             </td>
             <td class="px-1">
               {{
-                course.users_in_group ?
+                course.visible ?
                 "SI" :
                 "No"
               }}</td>
