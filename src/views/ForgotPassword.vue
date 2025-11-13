@@ -64,34 +64,34 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import PB from '@/components/ProgressBar.vue';
-import api from '@/plugins/axios';
+  import { ref } from "vue";
+  import PB from '@/components/ProgressBar.vue';
+  import api from '@/plugins/axios';
 
-const endpoint = import.meta.env.VITE_FORGOT_PASSWORD;
-const principalImage = '/assets/images/wallpapers/fondo.jpg';
-const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
-const pb = ref(false);
-const email = ref("");
-const error = ref("");
-const success = ref("");
+  const endpoint = import.meta.env.VITE_FORGOT_PASSWORD;
+  const principalImage = '/assets/images/wallpapers/fondo.jpg';
+  const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
+  const pb = ref(false);
+  const email = ref("");
+  const error = ref("");
+  const success = ref("");
 
-const requestPasswordReset = async () => {
-  pb.value = true;
-  error.value = "";
-  success.value = "";
-  const body = {
-    email: email.value,
-  }
+  const requestPasswordReset = async () => {
+    pb.value = true;
+    error.value = "";
+    success.value = "";
+    const body = {
+      email: email.value,
+    }
 
-  try {
-    const { data } = await api.post(endpoint, body);
-    success.value = data.message || "Se ha enviado un correo con las instrucciones.";
-  } catch (err) {
-    error.value =  err.response?.data?.message ||
-      "No pudimos procesar tu solicitud. Intenta más tarde.";
-  } finally {
-    pb.value = false;
-  }
-};
+    try {
+      const { data } = await api.post(endpoint, body);
+      success.value = data.message || "Se ha enviado un correo con las instrucciones.";
+    } catch (err) {
+      error.value =  err.response?.data?.message ||
+        "No pudimos procesar tu solicitud. Intenta más tarde.";
+    } finally {
+      pb.value = false;
+    }
+  };
 </script>

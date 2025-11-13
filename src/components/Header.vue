@@ -1,6 +1,6 @@
 <template>
   <header class="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 shadow-md">
-    <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <div class="flex-1 md:flex md:items-center md:gap-12">
           <img :src="logoPath" alt="Logo" class="h-14 w-auto">
