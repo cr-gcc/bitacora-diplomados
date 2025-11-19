@@ -76,16 +76,19 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  //   Dato del usuario API
-  const user = JSON.parse(localStorage.getItem("user"));
-  const isAuthenticated = !!localStorage.getItem("token");
-  //const userRoles = auth?.user?.roles || [];
+import { useAuthStore } from "@/stores/useAuthStore";
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
+
+  if (auth.user === null) {
+    await auth.fetchUser();
+  }
+
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
     // Ruta requiere autenticación pero NO está autenticado
     next("/login");
-  } else if (to.path === "/login" && isAuthenticated) {
+  } else if (to.path === "/login" && auth.isLoggedIn) {
     // Si está autenticado y quiere entrar a login, redirige a home
     next("/");
   } else {

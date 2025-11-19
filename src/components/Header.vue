@@ -64,7 +64,8 @@
                     Mi Perfil
                   </button>
                 </div>
-                <div v-if="auth.user.roles[0].name == 'admin'">
+                <!--<div v-if="auth.user.roles[0].name == 'admin'">-->
+                <div v-if="auth.user?.roles?.includes('admin')">
                   <RouterLink :to="'/usuarios'"
                     class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                     role="menuitem"

@@ -66,16 +66,19 @@
     if (user.value && password.value) {
       try {
         pb.value = true;
-        const res = await api.post('/login', {
+        await api.post('/login', {
           email: user.value,
           password: password.value
         });
-        auth.setToken(res.data.access_token);
-        auth.setUser(res.data.user);
+        const response = await api.get('/me');
+        auth.setUser(response.data);
         router.push('/')
       } 
       catch (e) {
-        error.value = e.response?.data?.message || 'Error al iniciar sesión';
+        error.value =
+          e.response?.data?.error ||
+          e.response?.data?.message ||
+          'Error al iniciar sesión';
       }
       finally {
         pb.value = false;

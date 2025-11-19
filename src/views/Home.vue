@@ -183,7 +183,6 @@
 		const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 		const url = `${endpointCC}`;
     const body = {'date':formattedDate};
-    console.log("INICIO");
     try {
       const response = await api.post(url, body);
       if (response.status == 200) {

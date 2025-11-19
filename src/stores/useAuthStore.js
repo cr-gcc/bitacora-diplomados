@@ -1,27 +1,31 @@
 import { defineStore } from "pinia";
+import api from "@/plugins/axios";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: JSON.parse(localStorage.getItem("user")) || null,
-    token: localStorage.getItem("token") || null,
+    user: null,
   }),
+
   getters: {
-    isLoggedIn: (state) => !!state.token,
+    isLoggedIn: (state) => !!state.user,
   },
+
   actions: {
-    setUser(userData) {
-      this.user = userData;
-      localStorage.setItem("user", JSON.stringify(userData)); // clave separada para usuario
+    async fetchUser() {
+      try {
+        const res = await api.get("/me");
+        this.user = res.data;
+      } catch (e) {
+        this.user = null;
+      }
     },
-    setToken(token) {
-      this.token = token;
-      localStorage.setItem("token", token);
+
+    setUser(user) {
+      this.user = user;
     },
+
     logout() {
-      this.$reset();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      this.user = null;
     },
   },
-  persist: false,
 });
