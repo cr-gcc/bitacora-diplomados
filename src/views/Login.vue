@@ -47,6 +47,7 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useAuthStore } from "@/stores/useAuthStore";
   import PB from '@/components/ProgressBar.vue';
   import api from '@/plugins/axios';
   
@@ -60,6 +61,7 @@
   const error = ref('');
 
   const login = async () => {
+    const auth = useAuthStore();
     error.value = '';
     if (user.value && password.value) {
       try {
@@ -68,6 +70,7 @@
           email: user.value,
           password: password.value
         });
+        await auth.fetchUser()
         router.push('/');
       } 
       catch (e) {

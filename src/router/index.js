@@ -78,7 +78,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     // Ruta requiere autenticación pero NO está autenticado
