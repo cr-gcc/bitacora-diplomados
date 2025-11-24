@@ -19,24 +19,25 @@
       </div>
     </div>
   </div>
-  <SplashScreen :isLoadingSS="loading" />
+  
 </template>
 <script setup>
   import { ref, onMounted } from 'vue';
+  import { useAppStore } from '@/stores/useAppStore';
   import { useTitleStore } from '@/stores/useTitleStore';
   import api from '@/plugins/axios';
 
   const endpoint = import.meta.env.VITE_CERTIFICATES;
   const url = `${endpoint}`;
+  const app = useAppStore()
   const titleStore = useTitleStore();
   const certificates = ref([]);
-  const loading = ref(false);
   const error = ref(null);
 
   titleStore.setColorTitle('Diplomados', 'slate-900');
 
   const getCertificates = async () => {
-    loading.value = true;
+    app.loadingApp = true;
     error.value = null;
     try {
       const response = await api.get(url);
@@ -44,7 +45,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar los certificados';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 

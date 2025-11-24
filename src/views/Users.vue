@@ -164,14 +164,15 @@
       </button>
     </div>
   </ModalOptions>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { onMounted, ref } from 'vue';
+  import { useAppStore } from '@/stores/useAppStore';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
 
+  const app = useAppStore();
   const titleStore = useTitleStore();
   const endpoint = import.meta.env.VITE_PROFILES;
   const password = import.meta.env.VITE_GENERAL_PASS;
@@ -179,7 +180,6 @@
   const modalAddEdit = ref(false);
   const modalRoles = ref(false);
   const modalPermissions = ref(false);
-  const loading = ref(false);
   const success = ref(null);
   const error = ref(null);
   const userId = ref(null);
@@ -265,7 +265,7 @@
       'Ha ocurrido un error en el sistema. por favor intentelo más tarde.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const editRole = async () => {
@@ -288,7 +288,7 @@
       error.value = e.response?.data?.message || 'Error al cargar editar el perfil.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const editPermission = async () => {
@@ -311,7 +311,7 @@
       error.value = e.response?.data?.message || 'Error al cargar editar el perfil.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
 
@@ -323,7 +323,7 @@
     formUser.value.email = "";
   }
   const setInitValues = (option) => {    
-    loading.value = option==1 ? true : false;
+    app.loadingApp = option==1 ? true : false;
     error.value = null;
     success.value = null;
   }
@@ -348,7 +348,7 @@
       error.value = e.response?.data?.message || 'Error al cargar los perfiles';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   } 
 

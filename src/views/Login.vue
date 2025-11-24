@@ -47,7 +47,6 @@
 <script setup>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useAuthStore } from '@/stores/useAuthStore';
   import PB from '@/components/ProgressBar.vue';
   import api from '@/plugins/axios';
   
@@ -55,7 +54,6 @@
   const logo = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
 
   const router = useRouter();
-  const auth = useAuthStore();
   const pb = ref(false);
   const user = ref('');
   const password = ref('');
@@ -70,9 +68,7 @@
           email: user.value,
           password: password.value
         });
-        const response = await api.get('/me');
-        auth.setUser(response.data);
-        router.push('/')
+        router.push('/');
       } 
       catch (e) {
         error.value =

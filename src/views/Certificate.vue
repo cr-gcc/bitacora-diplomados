@@ -363,18 +363,18 @@
       </button>
     </div>
   </ModalOptions>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 
 <script setup>
   import { onMounted, computed, watch, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useTitleStore } from '@/stores/useTitleStore';
+  import { useAppStore } from '@/stores/useAppStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import { truncate } from '@/utils/strTruncate';
   import { dateFormat } from '@/utils/dateFormat';
   import api from '@/plugins/axios';
-  // Data
+  //
   const route = useRoute();
   const slug = route.params.slug;
   const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
@@ -383,8 +383,8 @@
   const endpointCourses= import.meta.env.VITE_COURSES;
   const endpointGroups = import.meta.env.VITE_GROUPS;
   const endpointReviews = import.meta.env.VITE_REVIEWS;
+  const app = useAppStore(); 
   const titleStore = useTitleStore();
-  const loading = ref(false);
   const modalEditGroup = ref(false);
   const modalAddGroup = ref(false);
   const modalEditCourse = ref(false);
@@ -456,7 +456,7 @@
     reviewId.value = id;
     try {
       const response = await api.get(url);
-      loading.value = false;
+      app.loadingApp = false;
       if (response.status == 200) {
         review.value.course_id = response.data.course_id;
         review.value.study_plan = Boolean(response.data.study_plan);
@@ -474,7 +474,7 @@
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
 
@@ -539,7 +539,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar el/los grupo.';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
       code.value = "";
       status.value = "";
     }
@@ -562,7 +562,7 @@
       error.value = e.response?.data?.message || 'Error al cargar los grupos';
     } 
     finally {
-      loading.value = false;    
+      app.loadingApp = false;   
     }
   }
   const getCourse = async () => {
@@ -576,7 +576,7 @@
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
   const deleteGroup = async () => {
@@ -597,7 +597,7 @@
         error.value = e.response?.data?.message || 'Error al cargar el diplomado';
       } 
       finally {
-        loading.value = false;
+        app.loadingApp = false;
       }  
     }
   };
@@ -617,7 +617,7 @@
         error.value = e.response?.data?.message || 'Error al cargar el diplomado';
       } 
       finally {
-        loading.value = false;
+        app.loadingApp = false;
       }  
   }
   const createReview = async (id) => {
@@ -639,7 +639,7 @@
       alert(error.value);
     }
     finally {
-      loading.value = false;    
+      app.loadingApp = false;    
     }
   }
   const editReview = async () => {
@@ -655,11 +655,11 @@
       error.value = e.response?.data?.message || 'Error al editar la revisión';
     }
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const setInitValues = (option) => {    
-    loading.value = option==1 ? true : false;
+    app.loadingApp = option==1 ? true : false;
     error.value = null;
     success.value = null;
   }
@@ -675,7 +675,7 @@
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
   const getActiveProfessors = async () => {

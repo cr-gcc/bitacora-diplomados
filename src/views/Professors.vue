@@ -178,17 +178,17 @@
       </button>
     </div>
   </ModalOptions>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref } from 'vue'; 
+  import { useAppStore } from '@/stores/useAppStore';
   import { useTitleStore } from '@/stores/useTitleStore';
   import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
 
   const endpoint = import.meta.env.VITE_PROFESSORS;
+  const app = useAppStore();
   const titleStore = useTitleStore();
-  const loading = ref(false);
   const isModalOpen = ref(false);
   const error = ref(null);
   const success  = ref(null);
@@ -219,7 +219,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar los profesores';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 
@@ -257,7 +257,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 
@@ -282,7 +282,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 
@@ -313,7 +313,7 @@
       error.value = e.response?.data?.message || 'Error al agregar el profesor.';
     } 
     finally {
-      loading.value = false;    
+      app.loadingApp = false;    
     }
   };
 
@@ -338,12 +338,12 @@
       error.value = e.response?.data?.message || 'Error al buscar profesores';
     } 
     finally {
-      loading.value = false;    
+      app.loadingApp = false;    
     }
   };
 
   const setInitValues = (option) => {    
-    loading.value = option==1 ? true : false;
+    app.loadingApp = option==1 ? true : false;
     error.value = null;
     success.value = null;
   }

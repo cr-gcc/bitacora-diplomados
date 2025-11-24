@@ -92,20 +92,20 @@
   <div v-if="error" class="mt-2 mb-1">
     <p class="text-red-700">{{ error }}</p>
   </div>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { onMounted,ref } from 'vue'; 
+  import { useAppStore } from '@/stores/useAppStore';
   import { useTitleStore } from '@/stores/useTitleStore';
   import { dateFormat } from '@/utils/dateFormat';
   import api from '@/plugins/axios';
 
+  const app = useAppStore();
   const titleStore = useTitleStore();
   const endpointCertificate = import.meta.env.VITE_CERTIFICATES
   const endpointStatistics= import.meta.env.VITE_STATISTICS;
   const certificates = ref(null);
   const courses = ref(null);
-  const loading = ref(false);
   const error = ref(null);
   const search = ref({
     'certificate_id':'',
@@ -135,7 +135,7 @@
       error.value = e.response?.data?.message || 'Error al cargar los registros.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const downloadData = async () => {
@@ -164,11 +164,11 @@
       error.value = e.response?.data?.message || 'Error al cargar los registros.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const setInitValues = (option) => {    
-    loading.value = option==1 ? true : false;
+    app.loadingApp = option==1 ? true : false;
     error.value = null;
   }
 
@@ -185,7 +185,7 @@
       error.value = e.response?.data?.message || 'Error al cargar el diplomado';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 

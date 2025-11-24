@@ -65,7 +65,7 @@
                   </button>
                 </div>
                 <!--<div v-if="auth.user.roles[0].name == 'admin'">-->
-                <div v-if="auth.user?.roles?.includes('admin')">
+                <div v-if="auth.hasRole('admin')">
                   <RouterLink :to="'/usuarios'"
                     class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                     role="menuitem"
@@ -172,23 +172,23 @@
       </button>
     </div>
   </ModalOptions>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '@/stores/useAuthStore';
+  import { useAppStore } from "@/stores/useAppStore";
   import ModalOptions from '@/components/ModalOptions.vue';
   import api from '@/plugins/axios';
 
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
   const endpoint = import.meta.env.VITE_PROFILES;
   const auth = useAuthStore();
+  const app = useAppStore();
   const router = useRouter();
   const userMenu = ref(false);
   const modalEdit = ref(false);
   const mobileUserMenu = ref(false);
-  const loading = ref(false);
   const success = ref(null);
   const error = ref(null);
   const userMenuRef = ref(null);
@@ -226,7 +226,7 @@
     }
   };
   const openModalEdit = async () => {
-    loading.value = true;
+    app.loadingApp = true;
     const url = '/me';
     try {
       const response = await api.get(url);
@@ -245,11 +245,11 @@
       alert("Error al consultar el perfil del usuario.");
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const editUser = async () => {
-    loading.value = true;
+    app.loadingApp = true;
     const url = `${endpoint}/${userId.value}`;
     try {
       const response = await api.put(url, formUser.value);
@@ -265,7 +265,7 @@
       'Ha ocurrido un error en el sistema. por favor intentelo más tarde.';
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
   const closeModalEdit = () => {
@@ -279,14 +279,14 @@
   }
   const logout = async () => {
     try {
-      loading.value = true;
+      app.loadingApp = true;
       await api.post('/logout');
     } 
     catch (error) {
       console.warn('Error al hacer logout en API', error);
     } 
     finally {
-      loading.value = false;
+      app.loadingApp = false;
       auth.logout();
       router.push('/login');
     }

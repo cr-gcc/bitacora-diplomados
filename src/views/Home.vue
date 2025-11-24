@@ -102,11 +102,11 @@
       </button>
     </div>
   </ModalOptions>
-  <SplashScreen :isLoadingSS="loading" />
 </template>
 <script setup>
   import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router';
+  import { useAppStore } from '@/stores/useAppStore';
   import { useTitleStore } from '@/stores/useTitleStore';
   import { truncate } from '@/utils/strTruncate';
   import { dateFormat } from '@/utils/dateFormat';
@@ -116,12 +116,12 @@
   const endpointCMY = import.meta.env.VITE_CALENDAR_MY;
   const endpointCC = import.meta.env.VITE_COURSES_CALENDAR;
   const router = useRouter();
+  const app = useAppStore();
   const titleStore = useTitleStore();
   const currentDate = new Date();
   const year = ref(currentDate.getFullYear());
   const month = ref(currentDate.getMonth());
   const modalCertificates = ref(false);
-  const loading = ref(false);
   const error = ref(null);
   const daysOfWeek = [
     'Dom', 
@@ -177,7 +177,7 @@
   };
 
 	const openModal = async(day) => {
-    loading.value = true;
+    app.loadingApp = true;
     error.value = null;
     courses.value = [];
 		const formattedDate = `${year.value}-${String(month.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -202,7 +202,7 @@
       error.value = e.response?.data?.message || 'Error al cargar los cursos.';
       console.log(error.value);
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   };
 
@@ -231,7 +231,7 @@
 	}
 
   const getCoursesDates = async() => {
-    loading.value = true;
+    app.loadingApp = true;
     error.value = null;
     const url = `${endpointCMY}`;
     const date = `${year.value}-${String(month.value + 1).padStart(2, '0')}`;
@@ -242,7 +242,7 @@
     } catch (e) {
       error.value = e.response?.data?.message || 'Error al cargar las fechas de inicio.';
     } finally {
-      loading.value = false;
+      app.loadingApp = false;
     }
   }
 

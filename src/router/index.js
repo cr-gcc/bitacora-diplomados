@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "@/stores/useAuthStore";
+
 import Login from "@/views/Login.vue";
 import Home from "@/views/Home.vue";
 import Certificates from "@/views/Certificates.vue";
@@ -76,15 +78,8 @@ const router = createRouter({
   routes,
 });
 
-import { useAuthStore } from "@/stores/useAuthStore";
-
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
-
-  if (auth.user === null) {
-    await auth.fetchUser();
-  }
-
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     // Ruta requiere autenticación pero NO está autenticado
     next("/login");
