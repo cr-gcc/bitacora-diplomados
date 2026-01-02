@@ -14,6 +14,7 @@
                   Home
                 </RouterLink>
               </li>
+              <!--
               <li>
                 <RouterLink :to="'/diplomados'" class="text-gray-300 transition hover:text-white"
                 >
@@ -32,6 +33,7 @@
                   Estadisticas
                 </RouterLink>
               </li>
+              -->
             </ul>
           </nav>
           <!-- Avatar y menú -->
