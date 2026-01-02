@@ -65,7 +65,7 @@
 
 <script setup>
   import { ref } from "vue";
-  import PB from '@/components/ProgressBar.vue';
+  import PB from '@/components/ui/ProgressBar.vue';
   import api from '@/plugins/axios';
 
   const endpoint = import.meta.env.VITE_FORGOT_PASSWORD;

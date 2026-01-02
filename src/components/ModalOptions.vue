@@ -1,3 +1,4 @@
+@@ -1,25 +0,0 @@
 <template>
   <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center">
     <div class="absolute inset-0 bg-black opacity-70"></div>

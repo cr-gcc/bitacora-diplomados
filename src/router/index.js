@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 
 import Login from "@/views/Login.vue";
 import Home from "@/views/Home.vue";
+/*
 import Certificates from "@/views/Certificates.vue";
 import Certificate from "@/views/Certificate.vue";
 import Professors from "@/views/Professors.vue";
@@ -10,7 +11,7 @@ import Statistics from "@/views/Statistics.vue";
 import Users from "@/views/Users.vue";
 import ForgotPassword from "@/views/ForgotPassword.vue";
 import ResetPassword from "@/views/ResetPassword.vue";
-
+*/
 const routes = [
   {
     path: "/login",
@@ -20,6 +21,7 @@ const routes = [
       requiresAuth: false,
     },
   },
+  /*
   {
     path: "/forgot-password",
     component: ForgotPassword,
@@ -28,6 +30,7 @@ const routes = [
       requiresAuth: false,
     },
   },
+  */
   {
     path: "/",
     component: Home,
@@ -35,6 +38,7 @@ const routes = [
       requiresAuth: true,
     },
   },
+  /*
   {
     path: "/:slug",
     component: Certificate,
@@ -70,6 +74,7 @@ const routes = [
       requiresAuth: true,
     },
   },
+  */
 ];
 
 const base = import.meta.env.VITE_BASE_URL || "/";

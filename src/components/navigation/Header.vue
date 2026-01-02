@@ -138,7 +138,7 @@
       </div>
     </div>
   </header>
-  <ModalOptions v-model="modalEdit" title="Perfil">
+  <ModalOptions v-model="modalEdit" modalWidth="max-w-xl" title="Perfil">
     <div class="grid-max-3 gap-4 mb-2">
       <div>
         <span class="whitespace-nowrap">Nombre</span>

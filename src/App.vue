@@ -12,9 +12,9 @@
   import { useRoute } from 'vue-router';
   import { useAppStore } from "@/stores/useAppStore";
   import { storeToRefs } from "pinia";
-  import SplashScreen from "@/components/SplashScreen.vue";
+  import SplashScreen from "@/components/ui/SplashScreen.vue";
   import Layout from '@/layouts/Layout.vue';
-  import Styles from '@/components/Styles.vue';
+  import Styles from '@/styles/TailwindClasses.vue';
 
   const route = useRoute();
   

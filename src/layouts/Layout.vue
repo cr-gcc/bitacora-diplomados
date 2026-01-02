@@ -11,7 +11,7 @@
   </div>
 </template>
 <script setup>
-  import Header from '@/components/Header.vue';
-  import Title from '@/components/Title.vue';
-  import Footer from '@/components/Footer.vue';
+  import Header from '@/components/navigation/Header.vue';
+  import Title from '@/components/ui/PageTitle.vue';
+  import Footer from '@/components/navigation/Footer.vue';
 </script>

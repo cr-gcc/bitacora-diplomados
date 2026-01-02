@@ -1,0 +1,27 @@
+<template>
+  <div>
+      <!---->
+      <div class="hidden">
+        text-pink-950
+      text-blue-600
+      text-yellow-900
+      text-yellow-600
+      text-lime-900
+      text-blue-950
+      text-sky-900
+      text-slate-900
+      border-pink-950
+      border-blue-600
+      border-yellow-900
+      border-yellow-600
+      border-lime-900
+      border-blue-950
+      bg-pink-950
+      bg-blue-600
+      bg-yellow-900
+      bg-yellow-600
+      bg-lime-900
+      bg-blue-950
+    </div>
+  </div>
+</template>

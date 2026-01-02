@@ -26,7 +26,7 @@
                 </button>
               </div>
             </form>
-            <div class="mt-2 text-center">
+            <div v-if="forgotPassword" class="mt-2 text-center">
               <RouterLink
                 to="/forgot-password"
                 class="text-yellow-600 hover:font-semibold text-sm"
@@ -48,7 +48,7 @@
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from "@/stores/useAuthStore";
-  import PB from '@/components/ProgressBar.vue';
+  import PB from '@/components/ui/ProgressBar.vue';
   import api from '@/plugins/axios';
   
   const principalImage = '/assets/images/wallpapers/fondo.jpg';
@@ -59,6 +59,7 @@
   const user = ref('');
   const password = ref('');
   const error = ref('');
+  const forgotPassword = ref(false);
 
   const login = async () => {
     const auth = useAuthStore();
