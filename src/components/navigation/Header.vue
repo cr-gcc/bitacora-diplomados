@@ -14,14 +14,13 @@
                   Home
                 </RouterLink>
               </li>
-              <!--
               <li>
                 <RouterLink :to="'/diplomados'" class="text-gray-300 transition hover:text-white"
                 >
                   Diplomados
                 </RouterLink>
               </li>
-              <li>
+              <!--<li>
                 <RouterLink :to="'/profesores'" class="text-gray-300 transition hover:text-white"
                 >
                   Profesores
