@@ -18,7 +18,7 @@
         <div class="flex justify-end gap-1">
           <slot name="options"/>
         </div>
-        <div v-if="progressBar" class="mt-2">
+        <div v-if="loading" class="mt-2">
           <PB/>  
         </div>
       </div>
@@ -51,7 +51,7 @@
       type: String,
       default: null
     },
-    progressBar: {
+    loading: {
       type: Boolean,
       default: false
     },
