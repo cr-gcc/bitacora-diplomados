@@ -17,7 +17,7 @@
   const certificates = ref([]);
   const error = ref(null);
 
-  pageThemeStore.setPageTheme('Diplomados', 'slate-900');
+  pageThemeStore.setPageTheme('Diplomados', 'slate-800');
 
   const getCertificates = async () => {
     app.loadingApp = true;

@@ -1,6 +1,6 @@
 <template>
   <div v-if="certificate">
-    <h3 class="text-3xl mb-2" :class="'text-'+certificate.color">Grupos</h3>
+    <h3 class="text-3xl mb-2" :class="pageThemeStore.textColor">Grupos</h3>
     <div class="grid-max-4 gap-4 mb-4">
       <div>
         <input
@@ -8,15 +8,16 @@
           type="number"
           placeholder="Buscar"
           class="w-full rounded px-2 py-1 text-md border"
-          :class="'border-'+certificate.color"
+          :class="pageThemeStore.borderColor"
           @keyup.enter="searchGroupsCourses(1)"
         ></input>
       </div>
       <select
         v-model="status"
+        id="status"
         placeholder="Estatus"
         class="w-full rounded px-2 py-1 text-md border"
-        :class="'border-'+certificate.color"
+        :class="pageThemeStore.borderColor"
         @change="searchGroupsCourses(2)"
       >
         <option value="" disabled>Seleccione un estatus</option>
@@ -27,16 +28,22 @@
       <div>
         <button 
           @click="searchGroupsCourses(3)"
-          class="bcb-certificate" 
-          :class="['border-'+certificate.color, 'bg-'+certificate.color]">
+          :class="[
+            'bcb-certificate',
+            pageThemeStore.borderColor,
+            pageThemeStore.bgColor
+          ]">
           Todos
         </button>
       </div>
       <div>
         <button 
-          @click="openModalCourseAdd()"
-          class="bcb-certificate" 
-          :class="['border-'+certificate.color, 'bg-'+certificate.color]">
+          @click="openModalAddGroup()"
+          :class="[
+            'bcb-certificate',
+            pageThemeStore.borderColor,
+            pageThemeStore.bgColor
+          ]">
           Agregar
         </button>
       </div>
@@ -44,119 +51,128 @@
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
     </div>
-    <div v-if="groups.length>0" class="space-y-4">
-      <details v-for="group in groups" :key="'indg'+group.id" class="group [&_summary::-webkit-details-marker]:hidden">
-        <summary
-          class="flex items-center justify-between gap-1.5 rounded-md border border-gray-100 px-2 py-1 text-white"
-          :class="['border-'+certificate.color, 'bg-'+certificate.color]"
-        >
-          <h2 class="text-lg font-medium flex items-center gap-2">
-            {{ group.code }} 
-            <span v-if="group.status === 'active'" class="bg-green-700 basic-bag"
-            >
-              Activo
-            </span>
-            <span v-else-if="group.status === 'inactive'" class="bg-red-700 basic-bag"
-            >
-              Inactivo
-            </span>
-            <span v-else class="bg-gray-700 basic-bag">Finalizado</span>
-          </h2>
-          <svg
-            class="size-5 shrink-0 transition-transform duration-300 group-open:-rotate-180"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+    <AccordionGroup :groups="groups"/>
+    <AddGroup 
+      v-model="modalAddGroup" 
+      :certificate="certificate.id"
+      @refresh="searchGroupsCourses(3)"
+    />
+    <!--
+      <div v-if="groups.length>0" class="space-y-4">
+        <details v-for="group in groups" :key="'indg'+group.id" class="group [&_summary::-webkit-details-marker]:hidden">
+          <summary
+            class="flex items-center justify-between gap-1.5 rounded-md border border-gray-100 px-2 py-1 text-white"
+            :class="['border-'+certificate.color, 'bg-'+certificate.color]"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </summary>
-        <div class="px-2">
-          <div class="flex justify-end gap-2 py-1">
-            <button 
-              @click="openModalEdit(group.id, group.certificate_id, group.code)"
-              class="bo-mini"
-              :class="['bg-'+certificate.color]">
-              <i class="fa-solid fa-pen mr-0.5"></i>
-              Editar
-            </button>
+            <h2 class="text-lg font-medium flex items-center gap-2">
+              {{ group.code }} 
+              <span v-if="group.status === 'active'" class="bg-green-700 basic-bag"
+              >
+                Activo
+              </span>
+              <span v-else-if="group.status === 'inactive'" class="bg-red-700 basic-bag"
+              >
+                Inactivo
+              </span>
+              <span v-else class="bg-gray-700 basic-bag">Finalizado</span>
+            </h2>
+            <svg
+              class="size-5 shrink-0 transition-transform duration-300 group-open:-rotate-180"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="px-2">
+            <div class="flex justify-end gap-2 py-1">
+              <button 
+                @click="openModalEdit(group.id, group.certificate_id, group.code)"
+                class="bo-mini"
+                :class="['bg-'+certificate.color]">
+                <i class="fa-solid fa-pen mr-0.5"></i>
+                Editar
+              </button>
+            </div>
+            <table class="table-auto w-full">
+              <thead>
+                <tr>
+                  <th class="text-left">Inicio</th>
+                  <th class="text-left">Fin</th>
+                  <th class="text-left">Módulo</th>
+                  <th class="text-left">Diplomado</th>
+                  <th class="text-left">Profesor</th>
+                  <th class="text-left">Visible</th>
+                  <th class="text-left">Opciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-300">
+                <tr v-for="course in group.courses" :key="'indc'+course.id">
+                  <td class="py-1">{{ dateFormat(course.start_date) }}</td>
+                  <td class="py-1">{{ dateFormat(course.end_date) }}</td>
+                  <td class="py-1">{{ course.module.number }}</td>
+                  <td class="py-1">{{ truncate(course.module.name) }}</td>
+                  <td class="py-1">
+                    {{ 
+                      course.professor ? 
+                      course.professor.name+"  "+course.professor.last_name : 
+                      "Sin asignación" 
+                    }}  
+                  </td>
+                  <td class="py-1">
+                    <span 
+                      v-if="course.review && course.review.visible === 1"
+                      class="text-lime-600 font-semibold"
+                    >
+                      Si
+                    </span>
+                    <span 
+                      v-else
+                      class="text-red-500 font-semibold"
+                    >
+                      No
+                    </span>
+                  </td>
+                  <td class="py-1">
+                    <button 
+                      @click="openModalCourseEdit(course.id)"
+                      class="bo-mini mb-1"
+                      :class="['bg-'+certificate.color]">
+                      <i class="fa-solid fa-pen mr-0.5"></i>
+                      Editar
+                    </button>
+                    <button 
+                      v-if = "course.review"
+                      @click="openModalReview(course.review.id)"
+                      class="bo-mini"
+                      :class="['bg-'+certificate.color]">
+                      <i class="fa-solid fa-clipboard-check mr-0.5"></i>
+                      Revisar
+                    </button>
+                    <button 
+                      v-else
+                      @click="createReview(course.id)"
+                      class="bo-mini mb-1"
+                      :class="['bg-'+certificate.color]">
+                      <i class="fa-solid fa-calendar-plus mr-0.5"></i>
+                      Cargar Revisión
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table class="table-auto w-full">
-            <thead>
-              <tr>
-                <th class="text-left">Inicio</th>
-                <th class="text-left">Fin</th>
-                <th class="text-left">Módulo</th>
-                <th class="text-left">Diplomado</th>
-                <th class="text-left">Profesor</th>
-                <th class="text-left">Visible</th>
-                <th class="text-left">Opciones</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-300">
-              <tr v-for="course in group.courses" :key="'indc'+course.id">
-                <td class="py-1">{{ dateFormat(course.start_date) }}</td>
-                <td class="py-1">{{ dateFormat(course.end_date) }}</td>
-                <td class="py-1">{{ course.module.number }}</td>
-                <td class="py-1">{{ truncate(course.module.name) }}</td>
-                <td class="py-1">
-                  {{ 
-                    course.professor ? 
-                    course.professor.name+"  "+course.professor.last_name : 
-                    "Sin asignación" 
-                  }}  
-                </td>
-                <td class="py-1">
-                  <span 
-                    v-if="course.review && course.review.visible === 1"
-                    class="text-lime-600 font-semibold"
-                  >
-                    Si
-                  </span>
-                  <span 
-                    v-else
-                    class="text-red-500 font-semibold"
-                  >
-                    No
-                  </span>
-                </td>
-                <td class="py-1">
-                  <button 
-                    @click="openModalCourseEdit(course.id)"
-                    class="bo-mini mb-1"
-                    :class="['bg-'+certificate.color]">
-                    <i class="fa-solid fa-pen mr-0.5"></i>
-                    Editar
-                  </button>
-                  <button 
-                    v-if = "course.review"
-                    @click="openModalReview(course.review.id)"
-                    class="bo-mini"
-                    :class="['bg-'+certificate.color]">
-                    <i class="fa-solid fa-clipboard-check mr-0.5"></i>
-                    Revisar
-                  </button>
-                  <button 
-                    v-else
-                    @click="createReview(course.id)"
-                    class="bo-mini mb-1"
-                    :class="['bg-'+certificate.color]">
-                    <i class="fa-solid fa-calendar-plus mr-0.5"></i>
-                    Cargar Revisión
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
-    </div>
+        </details>
+      </div>
+    -->
   </div>
   <div v-else>
     <p>{{ error }}</p>
   </div>
-  <ModalOptions v-model="modalAddGroup" title="Agregar Grupo">
+  <!--
+  <ModalOptions v-model="modalAddGroup" modalWidth="max-w-sm" title="Agregar Grupo">
     <div class="gap-4 mb-2">
       <div>
         <span class="whitespace-nowrap">Grupo</span>
@@ -182,7 +198,7 @@
       </button>
     </div>
   </ModalOptions>
-  <ModalOptions v-model="modalEditGroup" title="Editar Grupo">
+  <ModalOptions v-model="modalEditGroup" modalWidth="max-w-md" title="Editar Grupo">
     <div class="gap-4 mb-2">
       <select
         v-model="formEdit.status"
@@ -220,7 +236,7 @@
       </button>
     </div>
   </ModalOptions>
-  <ModalOptions v-model="modalEditCourse" title="Editar Cursos">
+  <ModalOptions v-model="modalEditCourse" modalWidth="max-w-xl" title="Editar Cursos">
     <div class="grid-max-2 gap-4 mb-2">
       <div>
         <span class="whitespace-nowrap">Fecha de Inicio</span>
@@ -230,7 +246,7 @@
         <span class="whitespace-nowrap">Fecha de Termino</span>
         <input v-model="course.end_date" type="date" class="base-input-gray"/>
       </div>
-      <div>
+      <div class="col-span-2">
         <span class="whitespace-nowrap">Profesor</span>
         <select
           v-model="course.professor_id"
@@ -262,7 +278,7 @@
       </button>
     </div>
   </ModalOptions>
-  <ModalOptions v-model="modalReview" title="Revisión Curso">
+  <ModalOptions v-model="modalReview" modalWidth="max-w-3xl" title="Revisión Curso">
     <div class="grid-max-3 gap-4 mb-2">
       <div class="flex items-center gap-3">
         <span class="whitespace-nowrap">Plan de Trabajo</span>
@@ -363,20 +379,22 @@
       </button>
     </div>
   </ModalOptions>
+  -->
 </template>
+
 
 <script setup>
   import { onMounted, computed, watch, ref } from 'vue';
   import { useRoute } from 'vue-router';
-  import { useTitleStore } from '@/stores/useTitleStore';
   import { useAppStore } from '@/stores/useAppStore';
-  import ModalOptions from '@/components/ModalOptions.vue';
-  import { truncate } from '@/utils/strTruncate';
-  import { dateFormat } from '@/utils/dateFormat';
+  import { usePageThemeStore } from '@/stores/usePageThemeStore';
+  import AccordionGroup from '@/components/accordions/Group.vue';
+  import AddGroup from '@/components/modals/certificate/AddGroup.vue';
   import api from '@/plugins/axios';
   //
   const route = useRoute();
   const slug = route.params.slug;
+  
   const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
   const endpointProfessors = import.meta.env.VITE_PROFESSORS;
   const endpointModules = import.meta.env.VITE_MODULES;
@@ -384,7 +402,8 @@
   const endpointGroups = import.meta.env.VITE_GROUPS;
   const endpointReviews = import.meta.env.VITE_REVIEWS;
   const app = useAppStore(); 
-  const titleStore = useTitleStore();
+  const pageThemeStore = usePageThemeStore();
+
   const modalEditGroup = ref(false);
   const modalAddGroup = ref(false);
   const modalEditCourse = ref(false);
@@ -424,10 +443,13 @@
     'comments':'',
   });
   //  Observers
-  const totalStudentsRepeaters = computed(() => review.value.students + review.value.repeaters);
+  const totalStudentsRepeaters = computed(
+    () => review.value.students + review.value.repeaters
+  );
+  // Watchers
   watch(() => certificate.value, (newVal) => {
     if (newVal.name && newVal.color) {
-      titleStore.setColorTitle(newVal.name, newVal.color);
+      pageThemeStore.setPageTheme(newVal.name, newVal.color);
     }
   });
 
@@ -436,6 +458,9 @@
     setInitValues(0)
     courseFlag.value = 0;
     form.value.certificate_id = certificate.value.id;
+    modalAddGroup.value = true;
+  }
+  const openModalAddGroup = () => {
     modalAddGroup.value = true;
   }
   const openModalCourseEdit = async (id) => {

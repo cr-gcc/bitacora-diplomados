@@ -4,8 +4,8 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import Login from "@/views/Login.vue";
 import Home from "@/views/Home.vue";
 import Certificates from "@/views/Certificates.vue";
-/*
 import Certificate from "@/views/Certificate.vue";
+/*
 import Professors from "@/views/Professors.vue";
 import Statistics from "@/views/Statistics.vue";
 import Users from "@/views/Users.vue";
@@ -45,7 +45,6 @@ const routes = [
       requiresAuth: true,
     },
   },
-  /*
   {
     path: "/:slug",
     component: Certificate,
@@ -53,7 +52,7 @@ const routes = [
       requiresAuth: true,
     },
   },
-  
+   /*
   {
     path: "/profesores",
     component: Professors,
