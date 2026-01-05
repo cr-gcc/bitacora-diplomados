@@ -32,7 +32,7 @@
       <div class="px-2">
         <div class="flex justify-end gap-2 py-1">
           <button 
-            @click="openModal('editGroup')"
+            @click="openEditGroupModal(group.id)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -105,7 +105,11 @@
         </table>
       </div>
     </details>
-    <EditGroup v-model="modalEditGroup"/>
+    <EditGroup
+      v-model="modalEditGroup"
+      :group="groupId"
+      @refresh="refresh()"
+    />
     <EditCourse v-model="modalEditCourse"/>
     <ReviewCourse v-model="modalReviewCourse"/>
   </div>
@@ -118,9 +122,12 @@
   import EditGroup from '@/components/modals/certificate/EditGroup.vue';
   import EditCourse from '@/components/modals/certificate/EditCourse.vue';
   import ReviewCourse from '@/components/modals/certificate/ReviewCourse.vue';
-
+  
   const pageThemeStore = usePageThemeStore();
-
+  const modalEditGroup = ref(false);
+  const modalEditCourse = ref(false);
+  const modalReviewCourse = ref(false);
+  const groupId = ref(null);
   const props = defineProps({
     groups: {
       type: Array,
@@ -128,21 +135,14 @@
     }
   });
 
-  const modalEditGroup = ref(false);
-  const modalEditCourse = ref(false);
-  const modalReviewCourse = ref(false);
+  const emit = defineEmits(['refresh']);
+  
+  const openEditGroupModal = (id) => {
+    groupId.value = id;
+    modalEditGroup.value = true;
+  }
 
-  const openModal = (option) => {
-    switch (option) {
-      case 'editGroup':
-        modalEditGroup.value = true;
-        break;
-      case 'editCourse':
-        modalEditCourse.value = true;
-        break;
-      case 'reviewCourse':
-        modalReviewCourse.value = true;
-        break;
-    }
+  const refresh = () => {
+    emit('refresh');
   }
 </script>
