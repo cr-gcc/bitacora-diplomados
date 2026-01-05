@@ -3,7 +3,7 @@
     <div class="absolute inset-0 bg-black opacity-70"></div>
     <div :class="['relative bg-gray-300 rounded-lg shadow-xl w-full px-4 py-2 z-10', modalWidth]">
       <div class="flex justify-between items-center mb-2">
-        <h2 class="text-2xl font-semibold text-slate-900">{{ title }}</h2>
+        <h2 :class="['text-2xl font-semibold', pageThemeStore.textColor]">{{ title }}</h2>
       </div>
       <div class="mb-1">
         <slot name="body"/>
@@ -28,8 +28,10 @@
 
 <script setup>
   import { watch } from 'vue';
+  import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import PB from '@/components/ui/ProgressBar.vue';
 
+  const pageThemeStore = usePageThemeStore();
   const props = defineProps({
     modelValue: {
       type: Boolean,

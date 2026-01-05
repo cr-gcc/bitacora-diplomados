@@ -10,7 +10,7 @@
     <template #body>
       <div class="gap-4 mb-2">
         <div>
-          <span class="whitespace-nowrap">Grupo</span>
+          <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Grupo</span>
           <input v-model="form.code" type="text" class="base-input-gray" placeholder="Ejemplo: 9041"/>
         </div>
       </div>
@@ -18,12 +18,12 @@
     <template #options>
       <button 
         @click="addGroup()"
-        class="bcb-modal bg-sky-800">
+        :class="['bcb-modal', pageThemeStore.bgColor]">
         Guardar
       </button>
       <button
         @click="closeModal()"
-        class="bcb-modal bg-sky-800">
+        :class="['bcb-modal', pageThemeStore.bgColor]">
         Salir
       </button>
     </template>
@@ -31,9 +31,11 @@
 </template>
 <script setup>
   import { ref, computed, watch } from 'vue';
+  import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import BaseModal from '@/components/ui/BaseModal.vue';
   import api from '@/plugins/axios';
-
+  
+  const pageThemeStore = usePageThemeStore(); 
   const error = ref('');
   const success = ref('');
   const loading = ref(false);
