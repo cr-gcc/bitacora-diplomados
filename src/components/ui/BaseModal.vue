@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-  import { watch } from 'vue';
+  import { onMounted, onUnmounted, watch } from 'vue';
   import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import PB from '@/components/ui/ProgressBar.vue';
 
@@ -94,4 +94,12 @@
 	if (typeof window !== 'undefined') {
 		window.addEventListener('keydown', handleEscape);
 	}
+
+  onUnmounted(() => {
+    document.body.style.overflow = '';
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('keydown', handleEscape);
+    }
+  });
+
 </script>

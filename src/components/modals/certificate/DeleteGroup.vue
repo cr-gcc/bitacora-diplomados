@@ -2,32 +2,19 @@
   <BaseModal
     v-model="isOpen"
     modalWidth="max-w-sm"
-    title="Editar Grupo"
+    title="Eliminar Grupo"
     :error="error"
     :loading="loading"
     :success="success"
   >
     <template #body>
-      <div class="gap-4 mb-2">
-      <select
-        v-model="form.status"
-        placeholder="Estatus"
-        :class="[
-          'w-full rounded px-2 py-1 text-md border',
-          pageThemeStore.borderColor
-        ]">
-        <option value="" disabled>Seleccione un estatus</option>
-        <option value="active">Activo</option>
-        <option value="inactive">Inactivo</option>
-        <option value="finished">Finalizado</option>
-      </select>
-    </div>
+      <p>Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea eliminar el grupo?</p>
     </template>
     <template #options>
       <button 
-        @click="editGroup()"
+        @click="deleteGroup()"
         :class="['bcb-modal', pageThemeStore.bgColor]">
-        Editar
+        Eliminar
       </button>
       <button 
         @click="closeModal()"
@@ -81,31 +68,29 @@
     { immediate: true }
   );
 
-  const editGroup = async () => {
+  const deleteGroup = async () => {
     loading.value = true;
     success.value = "";
     error.value = "";
     
     const url = import.meta.env.VITE_GROUPS;
-    const urlEdit = `${url}/${groupId.value}`;
-    const body = form.value;
-    
+    const urlDelet = `${url}/${groupId.value}`;
     try {
-      const response = await api.put(urlEdit, body);
-      if (response.status == 200) {
+      const response = await api.delete(urlDelet);
+      if (response.status === 200) {
         success.value = response.data.message;
       }
       else {
-        error.value = response.data.error || 'Error al editar el grupo.';
+        error.value = response.data.message;
       }
     } 
     catch (e) {
-      error.value = e.response?.data?.error || 'Error al editar el grupo.';
+      error.value = e.response.data.message || 'Error al eliminar el grupo.';
     } 
     finally {
       loading.value = false;
-    }  
-  };
+    }
+  }
 
   const closeModal = () => {
     isOpen.value = false;
