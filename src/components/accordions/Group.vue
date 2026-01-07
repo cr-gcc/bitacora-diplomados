@@ -42,7 +42,7 @@
             Eliminar
           </button>
           <button 
-            @click="openModal('edit', group.id)"
+            @click="openModal('editGroup', group.id)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -93,6 +93,7 @@
               </td>
               <td class="py-1">
                 <button 
+                  @click="openModal('editCourse', course.id)"
                   :class="['bo-mini mb-1', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-pen mr-0.5"></i>
                   Editar
@@ -126,13 +127,17 @@
       :group="groupId"
       @refresh="refresh()"
     />
+    <EditCourse 
+      v-model="modalEditCourse"
+      :course="courseId"
+      @refresh="refresh()"
+      />
     <CreateReview 
       v-model="modalCreateReview" 
       :course="courseId"
       @refresh="refresh()"
     />
-
-    <EditCourse v-model="modalEditCourse"/>
+    
     <ReviewCourse v-model="modalReviewCourse"/>
   </div>
 </template>
@@ -166,13 +171,17 @@
   const emit = defineEmits(['refresh']);
 
   const openModal = (modal, id) => {
-    if (modal === 'edit') {
-      courseId.value = id;
+    if (modal === 'editGroup') {
+      groupId.value = id;
       modalEditGroup.value = true;
     }
     else if (modal === 'delete') {
       groupId.value = id;
       modalDeleteGroup.value = true;
+    }
+    else if (modal === 'editCourse') {
+      courseId.value = id;
+      modalEditCourse.value = true;
     }
     else if (modal === 'createReview') {
       courseId.value = id;

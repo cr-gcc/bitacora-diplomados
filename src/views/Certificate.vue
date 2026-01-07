@@ -242,7 +242,6 @@
   const groupId = ref(null);
   const success = ref(null);
   const error = ref(null);
-  const professors = ref([]);
   const modules = ref([]);
   const groups = ref([]);
   const courseFlag = ref(0);
@@ -390,27 +389,6 @@
     }
   };
   
-  const addEditGroupCourse = async () => {
-    setInitValues(1);
-    const urlGroups = `${endpointGroups}`;
-    const urlCourses = course.value ? `${endpointCourses}/${course.value.id}` : null;
-    const method = courseFlag.value === 0 ? 'post' : 'put';
-    const body = courseFlag.value === 0 ? form.value : course.value;
-    const url = courseFlag.value === 0 ? urlGroups : urlCourses;
-
-    try {
-      const response = await api[method](url, body);
-      if (response.status == 200) {
-        success.value = response.data.message;
-      }
-    }
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar los grupos';
-    } 
-    finally {
-      app.loadingApp = false;   
-    }
-  }
   const getCourse = async () => {
     setInitValues(1);
     const url = `${endpointCourses}/${courseId.value}`;
@@ -462,16 +440,7 @@
       app.loadingApp = false;
     }
   };
-  const getActiveProfessors = async () => {
-    const url = `${endpointProfessors}/by-status/1`;
-    try {
-      const response = await api.get(url);
-      professors.value = response.data; 
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error consultar el profesor';
-    }
-  }
+
   const getModules = async () => {
     const url = `${endpointModules}/by-certificate/${certificate.value.id}`;
     try {
@@ -486,7 +455,6 @@
   //  Hooks
   onMounted(async () => {
     await getCertificate();
-    getActiveProfessors();
     getModules();
 
     if (route.query.code) {
