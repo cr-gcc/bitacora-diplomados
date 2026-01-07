@@ -38,7 +38,7 @@
       </div>
       <div>
         <button 
-          @click="openModalAddGroup()"
+          @click="openModalGroup('add')"
           :class="[
             'bcb-certificate',
             pageThemeStore.borderColor,
@@ -51,191 +51,17 @@
     <div v-if="error" class="mt-2 mb-1">
       <p class="text-red-700">{{ error }}</p>
     </div>
-    <AccordionGroup :groups="groups"/>
+    <AccordionGroup :groups="groups" @refresh="searchGroupsCourses(3)"/>
     <AddGroup 
       v-model="modalAddGroup" 
       :certificate="certificate.id"
       @refresh="searchGroupsCourses(3)"
     />
-    <!--
-      <div v-if="groups.length>0" class="space-y-4">
-        <details v-for="group in groups" :key="'indg'+group.id" class="group [&_summary::-webkit-details-marker]:hidden">
-          <summary
-            class="flex items-center justify-between gap-1.5 rounded-md border border-gray-100 px-2 py-1 text-white"
-            :class="['border-'+certificate.color, 'bg-'+certificate.color]"
-          >
-            <h2 class="text-lg font-medium flex items-center gap-2">
-              {{ group.code }} 
-              <span v-if="group.status === 'active'" class="bg-green-700 basic-bag"
-              >
-                Activo
-              </span>
-              <span v-else-if="group.status === 'inactive'" class="bg-red-700 basic-bag"
-              >
-                Inactivo
-              </span>
-              <span v-else class="bg-gray-700 basic-bag">Finalizado</span>
-            </h2>
-            <svg
-              class="size-5 shrink-0 transition-transform duration-300 group-open:-rotate-180"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <div class="px-2">
-            <div class="flex justify-end gap-2 py-1">
-              <button 
-                @click="openModalEdit(group.id, group.certificate_id, group.code)"
-                class="bo-mini"
-                :class="['bg-'+certificate.color]">
-                <i class="fa-solid fa-pen mr-0.5"></i>
-                Editar
-              </button>
-            </div>
-            <table class="table-auto w-full">
-              <thead>
-                <tr>
-                  <th class="text-left">Inicio</th>
-                  <th class="text-left">Fin</th>
-                  <th class="text-left">Módulo</th>
-                  <th class="text-left">Diplomado</th>
-                  <th class="text-left">Profesor</th>
-                  <th class="text-left">Visible</th>
-                  <th class="text-left">Opciones</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-300">
-                <tr v-for="course in group.courses" :key="'indc'+course.id">
-                  <td class="py-1">{{ dateFormat(course.start_date) }}</td>
-                  <td class="py-1">{{ dateFormat(course.end_date) }}</td>
-                  <td class="py-1">{{ course.module.number }}</td>
-                  <td class="py-1">{{ truncate(course.module.name) }}</td>
-                  <td class="py-1">
-                    {{ 
-                      course.professor ? 
-                      course.professor.name+"  "+course.professor.last_name : 
-                      "Sin asignación" 
-                    }}  
-                  </td>
-                  <td class="py-1">
-                    <span 
-                      v-if="course.review && course.review.visible === 1"
-                      class="text-lime-600 font-semibold"
-                    >
-                      Si
-                    </span>
-                    <span 
-                      v-else
-                      class="text-red-500 font-semibold"
-                    >
-                      No
-                    </span>
-                  </td>
-                  <td class="py-1">
-                    <button 
-                      @click="openModalCourseEdit(course.id)"
-                      class="bo-mini mb-1"
-                      :class="['bg-'+certificate.color]">
-                      <i class="fa-solid fa-pen mr-0.5"></i>
-                      Editar
-                    </button>
-                    <button 
-                      v-if = "course.review"
-                      @click="openModalReview(course.review.id)"
-                      class="bo-mini"
-                      :class="['bg-'+certificate.color]">
-                      <i class="fa-solid fa-clipboard-check mr-0.5"></i>
-                      Revisar
-                    </button>
-                    <button 
-                      v-else
-                      @click="createReview(course.id)"
-                      class="bo-mini mb-1"
-                      :class="['bg-'+certificate.color]">
-                      <i class="fa-solid fa-calendar-plus mr-0.5"></i>
-                      Cargar Revisión
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
-      </div>
-    -->
   </div>
   <div v-else>
     <p>{{ error }}</p>
   </div>
   <!--
-  <ModalOptions v-model="modalAddGroup" modalWidth="max-w-sm" title="Agregar Grupo">
-    <div class="gap-4 mb-2">
-      <div>
-        <span class="whitespace-nowrap">Grupo</span>
-        <input v-model="form.code" type="text" class="base-input-gray" placeholder="Ejemplo: 9041"/>
-      </div>  
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="addEditGroupCourse()" 
-        class="bcb-modal bg-sky-800">
-        Guardar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(0) : closeModal(0)"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
-  <ModalOptions v-model="modalEditGroup" modalWidth="max-w-md" title="Editar Grupo">
-    <div class="gap-4 mb-2">
-      <select
-        v-model="formEdit.status"
-        placeholder="Estatus"
-        class="w-full rounded px-2 py-1 text-md border"
-        :class="'border-'+certificate.color"
-      >
-        <option value="" disabled>Seleccione un estatus</option>
-        <option value="active">Activo</option>
-        <option value="inactive">Inactivo</option>
-        <option value="finished">Finalizado</option>
-      </select>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="deleteGroup()" 
-        class="bcb-modal bg-sky-800">
-        Eliminar
-      </button>
-      <button 
-        @click="editGroup()" 
-        class="bcb-modal bg-sky-800">
-        Editar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(2) : closeModal(2)"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
   <ModalOptions v-model="modalEditCourse" modalWidth="max-w-xl" title="Editar Cursos">
     <div class="grid-max-2 gap-4 mb-2">
       <div>
@@ -384,7 +210,7 @@
 
 
 <script setup>
-  import { onMounted, computed, watch, ref } from 'vue';
+  import { onMounted, watch, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useAppStore } from '@/stores/useAppStore';
   import { usePageThemeStore } from '@/stores/usePageThemeStore';
@@ -404,8 +230,8 @@
   const app = useAppStore(); 
   const pageThemeStore = usePageThemeStore();
 
-  const modalEditGroup = ref(false);
   const modalAddGroup = ref(false);
+  const modalEditGroup = ref(false);
   const modalEditCourse = ref(false);
   const modalFinishGroup = ref(false);
   const modalReview = ref(false);
@@ -427,10 +253,6 @@
     'code':'',
     'status':''
   })
-  const form = ref({
-    'certificate_id':'',
-    'code':''
-  });
   const review = ref({
     'course_id':'',
     'study_plan':'',
@@ -442,27 +264,29 @@
     'visible':'',
     'comments':'',
   });
+  /*
   //  Observers
   const totalStudentsRepeaters = computed(
     () => review.value.students + review.value.repeaters
   );
+  */
   // Watchers
   watch(() => certificate.value, (newVal) => {
     if (newVal.name && newVal.color) {
       pageThemeStore.setPageTheme(newVal.name, newVal.color);
     }
   });
+  //  Open modals methods
+  const openModalGroup = (option) => {
+    if (option=='add') {
+      modalAddGroup.value = true;
+    }
+    else if (option=='edit') {
+      modalEditGroup.value = true;
+    }
+  };
 
-  //  Open modals
-  const openModalCourseAdd = () => {
-    setInitValues(0)
-    courseFlag.value = 0;
-    form.value.certificate_id = certificate.value.id;
-    modalAddGroup.value = true;
-  }
-  const openModalAddGroup = () => {
-    modalAddGroup.value = true;
-  }
+  
   const openModalCourseEdit = async (id) => {
     courseId.value = id;
     courseFlag.value = 1;
@@ -533,10 +357,6 @@
       form.value.code = "";  
     }
   }
-  const closeAndGetGroups = (option) => {
-    closeModal(option);
-    searchGroupsCourses(3);
-  }
 
   //  Functions
   const searchGroupsCourses = async (option) => {
@@ -569,6 +389,7 @@
       status.value = "";
     }
   };
+  
   const addEditGroupCourse = async () => {
     setInitValues(1);
     const urlGroups = `${endpointGroups}`;
@@ -604,69 +425,7 @@
       app.loadingApp = false;
     }
   };
-  const deleteGroup = async () => {
-    const confirmed = window.confirm("Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea eliminar el grupo?");
-    if (!confirmed) {
-      return 0;
-    }
-    else {
-      setInitValues(1);
-      const url = `${endpointGroups}/${groupId.value}`;
-      try {
-        const response = await api.delete(url);
-        if (response.status == 200) {
-          success.value = response.data.message;
-        }
-      } 
-      catch (e) {
-        error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-      } 
-      finally {
-        app.loadingApp = false;
-      }  
-    }
-  };
-  const editGroup = async () => {
-    setInitValues(1);
-    const url = `${endpointGroups}/${groupId.value}`;
-    try {
-        const response = await api.put(url, formEdit.value);
-        if (response.status == 200) {
-          success.value = response.data.message;
-        }
-        else {
-          error.value = "Error";
-        }
-      } 
-      catch (e) {
-        error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-      } 
-      finally {
-        app.loadingApp = false;
-      }  
-  }
-  const createReview = async (id) => {
-    setInitValues(1);
-    const url = `${endpointReviews}`;
-    const body = ref({
-      'course_id':id
-    });
-    try {
-      const response = await api.post(url, body.value);
-      if (response.status == 200) {
-        success.value = response.data.message;
-        alert(success.value);
-        searchGroupsCourses(3);
-      }
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar la revisión';
-      alert(error.value);
-    }
-    finally {
-      app.loadingApp = false;    
-    }
-  }
+
   const editReview = async () => {
     setInitValues(1);
     const url = `${endpointReviews}/${reviewId.value}`;

@@ -32,7 +32,7 @@
       <div class="px-2">
         <div class="flex justify-end gap-2 py-1">
           <button 
-            @click="openModalGroup('delete', group.id)"
+            @click="openModal('delete', group.id)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -42,7 +42,7 @@
             Eliminar
           </button>
           <button 
-            @click="openModalGroup('edit', group.id)"
+            @click="openModal('edit', group.id)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -105,6 +105,7 @@
                 </button>
                 <button 
                   v-else
+                  @click="openModal('createReview', course.id)"
                   :class="['bo-mini', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-calendar-plus mr-0.5"></i>
                   Cargar Revisión
@@ -125,6 +126,12 @@
       :group="groupId"
       @refresh="refresh()"
     />
+    <CreateReview 
+      v-model="modalCreateReview" 
+      :course="courseId"
+      @refresh="refresh()"
+    />
+
     <EditCourse v-model="modalEditCourse"/>
     <ReviewCourse v-model="modalReviewCourse"/>
   </div>
@@ -135,16 +142,20 @@
   import { truncate } from '@/utils/strTruncate';
   import { dateFormat } from '@/utils/dateFormat';
   import EditGroup from '@/components/modals/certificate/EditGroup.vue';
+  import DeleteGroup from '@/components/modals/certificate/DeleteGroup.vue';
+  import CreateReview from '@/components/modals/certificate/CreateReview.vue';
   import EditCourse from '@/components/modals/certificate/EditCourse.vue';
   import ReviewCourse from '@/components/modals/certificate/ReviewCourse.vue';
-  import DeleteGroup from '@/components/modals/certificate/DeleteGroup.vue';
+  
   
   const pageThemeStore = usePageThemeStore();
   const modalEditGroup = ref(false);
   const modalDeleteGroup = ref(false);
+  const modalCreateReview = ref(false);
   const modalEditCourse = ref(false);
   const modalReviewCourse = ref(false);
   const groupId = ref(null);
+  const courseId = ref(null);
   const props = defineProps({
     groups: {
       type: Array,
@@ -154,13 +165,18 @@
 
   const emit = defineEmits(['refresh']);
 
-  const openModalGroup = (modal, id) => {
-    groupId.value = id;
+  const openModal = (modal, id) => {
     if (modal === 'edit') {
+      courseId.value = id;
       modalEditGroup.value = true;
     }
     else if (modal === 'delete') {
+      groupId.value = id;
       modalDeleteGroup.value = true;
+    }
+    else if (modal === 'createReview') {
+      courseId.value = id;
+      modalCreateReview.value = true;
     }
     else {
       console.log('Modal no encontrado');
