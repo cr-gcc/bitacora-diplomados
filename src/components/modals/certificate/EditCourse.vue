@@ -5,34 +5,31 @@
     title="Editar Curso"
     :error="error"
     :success="success"
-    :loading="loading"
+    :loading="loading"  
   >
     <template #body>
       <div class="grid-max-2 gap-4 mb-2">
-      <div>
-        <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Fecha de Inicio</span>
-        <input v-model="form.start_date" type="date" class="base-input-gray"/>
+        <div>
+          <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Fecha de Inicio</span>
+          <input v-model="form.start_date" type="date" class="base-input-gray"/>
+        </div>
+        <div>
+          <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Fecha de Termino</span>
+          <input v-model="form.end_date" type="date" class="base-input-gray"/>
+        </div>
+        <div class="col-span-2">
+          <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Profesor</span>
+          <select
+            v-model="form.professor_id"
+            class="base-input-gray"
+          >
+            <option value="null" disabled>Seleccione un profesor</option>
+            <option v-for="professor in professors" :value="professor.id" :key="'ind_'+professor.id">
+              {{ professor.name }} {{ professor.last_name }}
+            </option>
+          </select>
+        </div>
       </div>
-      <div>
-        <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Fecha de Termino</span>
-        <input v-model="form.end_date" type="date" class="base-input-gray"/>
-      </div>
-      <div class="col-span-2">
-        <span :class="['whitespace-nowrap', pageThemeStore.textColor]">Profesor</span>
-        <select
-          v-model="form.professor_id"
-          class="base-input-gray"
-        >
-          <option value="null" disabled>Seleccione un profesor</option>
-          <option v-for="professor in professors" :value="professor.id" :key="'ind_'+professor.id">
-            {{ professor.name }} {{ professor.last_name }}
-          </option>
-        </select>
-      </div>
-      <div>
-        {{ form }}
-      </div>
-    </div>
     </template>
     <template #options>
       <button 
@@ -147,7 +144,7 @@
 
     error.value = "";
     success.value = "";
-    
+
     courseId.value = null;
     form.value.start_date = null;
     form.value.end_date = null;

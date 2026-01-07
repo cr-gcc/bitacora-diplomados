@@ -4,8 +4,8 @@
     modalWidth="max-w-sm"
     title="Eliminar Grupo"
     :error="error"
-    :loading="loading"
     :success="success"
+    :loading="loading"  
   >
     <template #body>
       <p>Si elimina el grupo, todos los cursos se eliminarán tambien. ¿Desea eliminar el grupo?</p>

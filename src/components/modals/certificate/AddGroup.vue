@@ -5,7 +5,7 @@
     title="Agregar Grupo"
     :error="error"
     :success="success"
-    :loading="loading"
+    :loading="loading"  
   >
     <template #body>
       <div class="gap-4 mb-2">

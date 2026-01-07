@@ -4,24 +4,24 @@
     modalWidth="max-w-sm"
     title="Editar Grupo"
     :error="error"
-    :loading="loading"
     :success="success"
+    :loading="loading"  
   >
     <template #body>
       <div class="gap-4 mb-2">
-      <select
-        v-model="form.status"
-        placeholder="Estatus"
-        :class="[
-          'w-full rounded px-2 py-1 text-md border',
-          pageThemeStore.borderColor
-        ]">
-        <option value="" disabled>Seleccione un estatus</option>
-        <option value="active">Activo</option>
-        <option value="inactive">Inactivo</option>
-        <option value="finished">Finalizado</option>
-      </select>
-    </div>
+        <select
+          v-model="form.status"
+          placeholder="Estatus"
+          :class="[
+            'w-full rounded px-2 py-1 text-md border',
+            pageThemeStore.borderColor
+          ]">
+          <option value="" disabled>Seleccione un estatus</option>
+          <option value="active">Activo</option>
+          <option value="inactive">Inactivo</option>
+          <option value="finished">Finalizado</option>
+        </select>
+      </div>
     </template>
     <template #options>
       <button 
@@ -45,9 +45,9 @@
 
   const pageThemeStore = usePageThemeStore();
   const groupId = ref(null);
-  const loading = ref(false);
-  const success = ref('');
   const error = ref('');
+  const success = ref('');
+  const loading = ref(false);
   const form = ref({
     status: "",
   });

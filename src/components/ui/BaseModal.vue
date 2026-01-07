@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-  import { onMounted, onUnmounted, watch } from 'vue';
+  import { onUnmounted, watch } from 'vue';
   import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import PB from '@/components/ui/ProgressBar.vue';
 

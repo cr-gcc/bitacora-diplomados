@@ -61,153 +61,7 @@
   <div v-else>
     <p>{{ error }}</p>
   </div>
-  <!--
-  <ModalOptions v-model="modalEditCourse" modalWidth="max-w-xl" title="Editar Cursos">
-    <div class="grid-max-2 gap-4 mb-2">
-      <div>
-        <span class="whitespace-nowrap">Fecha de Inicio</span>
-        <input v-model="course.start_date" type="date" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Fecha de Termino</span>
-        <input v-model="course.end_date" type="date" class="base-input-gray"/>
-      </div>
-      <div class="col-span-2">
-        <span class="whitespace-nowrap">Profesor</span>
-        <select
-          v-model="course.professor_id"
-          class="base-input-gray"
-        >
-          <option value="null" disabled>Seleccione un profesor</option>
-          <option v-for="professor in professors" :value="professor.id" :key="'ind_'+professor.id">
-            {{ professor.name }} {{ professor.last_name }}
-          </option>
-        </select>
-      </div>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="addEditGroupCourse()"
-        class="bcb-modal bg-sky-800">
-        Guardar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(1) : closeModal(1)"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
-  <ModalOptions v-model="modalReview" modalWidth="max-w-3xl" title="Revisión Curso">
-    <div class="grid-max-3 gap-4 mb-2">
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Plan de Trabajo</span>
-        <label
-          for="plan"
-          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
-        >
-          <input v-model="review.study_plan" type="checkbox" id="plan" class="peer sr-only" />
-          <span
-            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
-          ></span>
-        </label>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Fechas</span>
-        <label
-          for="dates"
-          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
-        >
-          <input v-model="review.dates" type="checkbox" id="dates" class="peer sr-only" />
-          <span
-            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
-          ></span>
-        </label>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Grupo con Usuarios</span>
-        <label
-          for="users_in_group"
-          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
-        >
-          <input v-model="review.users_in_group" type="checkbox" id="users_in_group" class="peer sr-only" />
-          <span
-            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
-          ></span>
-        </label>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Examen</span>
-        <select
-          v-model="review.exam"
-          class="base-input-gray"
-        >
-          <option value="pendant">Pendiente</option>
-          <option value="tested">Realizado</option>
-        </select>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Estudiantes</span>
-        <input v-model="review.students" type="number" class="base-input-gray"/>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Recursadores</span>
-        <input v-model="review.repeaters" type="number" class="base-input-gray"/>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Total</span>
-        <input v-model="totalStudentsRepeaters" type="number" class="base-input-gray" disabled/>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <span class="whitespace-nowrap">Grupo Visible</span>
-        <label
-          for="visible"
-          class="relative block h-6 w-10 rounded-full bg-gray-300 transition-colors [-webkit-tap-highlight-color:_transparent] has-checked:bg-sky-800 dark:bg-gray-600 dark:has-checked:bg-sky-800"
-        >
-          <input v-model="review.visible" type="checkbox" id="visible" class="peer sr-only" />
-          <span
-            class="absolute inset-y-0 start-0 m-1 size-4 rounded-full bg-white transition-[inset-inline-start] peer-checked:start-4 dark:bg-gray-300"
-          ></span>
-        </label>
-      </div>
-
-      <div class="md:col-span-3">
-        <label for="comentario">Comentario</label>
-        <textarea v-model="review.comments" id="comentario"
-          class="base-input-gray mt-0.5 w-full h-24 resize-none rounded border-gray-300 shadow-sm sm:text-sm"
-          placeholder="Escribe tu comentario aquí..."
-        ></textarea>
-      </div>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="editReview()"
-        class="bcb-modal bg-sky-800">
-        Guardar
-      </button>
-      <button 
-        @click="success ? closeAndGetGroups(3) : closeModal(3)"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
-  -->
 </template>
-
 
 <script setup>
   import { onMounted, watch, ref } from 'vue';
@@ -222,9 +76,7 @@
   const slug = route.params.slug;
   
   const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
-  const endpointProfessors = import.meta.env.VITE_PROFESSORS;
   const endpointModules = import.meta.env.VITE_MODULES;
-  const endpointCourses= import.meta.env.VITE_COURSES;
   const endpointGroups = import.meta.env.VITE_GROUPS;
   const endpointReviews = import.meta.env.VITE_REVIEWS;
   const app = useAppStore(); 
@@ -263,12 +115,6 @@
     'visible':'',
     'comments':'',
   });
-  /*
-  //  Observers
-  const totalStudentsRepeaters = computed(
-    () => review.value.students + review.value.repeaters
-  );
-  */
   // Watchers
   watch(() => certificate.value, (newVal) => {
     if (newVal.name && newVal.color) {
@@ -284,79 +130,6 @@
       modalEditGroup.value = true;
     }
   };
-
-  
-  const openModalCourseEdit = async (id) => {
-    courseId.value = id;
-    courseFlag.value = 1;
-    await getCourse();
-    modalEditCourse.value = true;
-  };
-  const openModalEdit = (id, certificate_id, code) => {
-    groupId.value = id;
-    formEdit.value.certificate_id = certificate_id;
-    formEdit.value.code = code;
-    modalEditGroup.value = true;
-  }
-  const openModalReview = async (id) => {
-    setInitValues(1);
-    const url= `${endpointReviews}/${id}`;
-    reviewId.value = id;
-    try {
-      const response = await api.get(url);
-      app.loadingApp = false;
-      if (response.status == 200) {
-        review.value.course_id = response.data.course_id;
-        review.value.study_plan = Boolean(response.data.study_plan);
-        review.value.dates = Boolean(response.data.dates);
-        review.value.users_in_group = Boolean(response.data.users_in_group);
-        review.value.exam = response.data.exam;
-        review.value.students = response.data.students;
-        review.value.repeaters = response.data.repeaters;
-        review.value.visible = Boolean(response.data.visible);
-        review.value.comments = response.data.comments;
-        modalReview.value = true;
-      }
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } 
-    finally {
-      app.loadingApp = false;
-    }
-  }
-
-  //  Close modals
-  const closeModal = (option) => {
-    setInitValues(0);
-    if (option==1) {
-      modalEditCourse.value = false;
-      course.value = null;
-    }
-    else if (option==2) {
-      modalEditGroup.value = false;
-    }
-    else if (option==3) {
-      modalReview.value = false;
-      review.value.course_id = "";
-      review.value.study_plan = "";
-      review.value.dates = "";
-      review.value.users_in_group = "";
-      review.value.exam = "";
-      review.value.students = "";
-      review.value.repeaters = "";
-      review.value.visible = "";
-      review.value.comments = "";
-    }
-    else if (option==4){
-      modalFinishGroup.value = false;
-    }
-    else {
-      modalAddGroup.value = false;
-      form.value.code = "";  
-    }
-  }
-
   //  Functions
   const searchGroupsCourses = async (option) => {
     setInitValues(1);
@@ -388,21 +161,7 @@
       status.value = "";
     }
   };
-  
-  const getCourse = async () => {
-    setInitValues(1);
-    const url = `${endpointCourses}/${courseId.value}`;
-    try {
-      const response = await api.get(url);
-      course.value = response.data;
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al cargar el diplomado';
-    } 
-    finally {
-      app.loadingApp = false;
-    }
-  };
+
 
   const editReview = async () => {
     setInitValues(1);

@@ -4,8 +4,8 @@
     modalWidth="max-w-sm"
     title="Crear Revisión"
     :error="error"
-    :loading="loading"
     :success="success"
+    :loading="loading"  
   >
     <template #body>
       <p>La creación de revisión ayuda al control del grupo. ¿Desea crear la revisión?</p>

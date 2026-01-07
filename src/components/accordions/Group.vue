@@ -99,7 +99,8 @@
                   Editar
                 </button>
                 <button 
-                  v-if = "course.review"
+                  v-if = "course?.review"
+                  @click="openModal('reviewCourse', course.review.id)"
                   :class="['bo-mini', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-clipboard-check mr-0.5"></i>
                   Revisar
@@ -131,14 +132,17 @@
       v-model="modalEditCourse"
       :course="courseId"
       @refresh="refresh()"
-      />
+    />
     <CreateReview 
       v-model="modalCreateReview" 
       :course="courseId"
       @refresh="refresh()"
     />
-    
-    <ReviewCourse v-model="modalReviewCourse"/>
+    <ReviewCourse 
+      v-model="modalReviewCourse"
+      :review="reviewId"
+      @refresh="refresh()"
+    />
   </div>
 </template>
 <script setup>
@@ -152,7 +156,6 @@
   import EditCourse from '@/components/modals/certificate/EditCourse.vue';
   import ReviewCourse from '@/components/modals/certificate/ReviewCourse.vue';
   
-  
   const pageThemeStore = usePageThemeStore();
   const modalEditGroup = ref(false);
   const modalDeleteGroup = ref(false);
@@ -161,6 +164,7 @@
   const modalReviewCourse = ref(false);
   const groupId = ref(null);
   const courseId = ref(null);
+  const reviewId = ref(null);
   const props = defineProps({
     groups: {
       type: Array,
@@ -186,6 +190,10 @@
     else if (modal === 'createReview') {
       courseId.value = id;
       modalCreateReview.value = true;
+    }
+    else if (modal === 'reviewCourse') {
+      reviewId.value = id;
+      modalReviewCourse.value = true;
     }
     else {
       console.log('Modal no encontrado');
