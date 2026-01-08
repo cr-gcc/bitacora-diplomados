@@ -48,6 +48,7 @@
             <th class="px-1 font-bold">Diplomado</th>
             <th class="px-1">Grupo</th>
             <th class="px-1">Modulo</th>
+            <th class="px-1">Nombre Diplomado</th>
             <th class="px-1">Profesor</th>
             <th class="px-1">Fecha Inicio</th>
             <th class="px-1">Fecha Fin</th>
@@ -58,11 +59,14 @@
         </thead>
         <tbody class="divide-y divide-gray-300 text-center">
           <tr v-for="course in courses" :key="course.id">
+            <!--Certificate-->
             <td class="px-1">{{ course.module.certificate.name }}</td>
             <!--Group-->
             <td class="px-1">{{ course.group.code }}</td>
             <!--Module-->
             <td class="px-1">{{ course.module.number }}</td>
+            <!--Name-->
+            <td class="px-1">{{ course.module.name }}</td>
             <!--Professor-->
             <td v-if="course.professor_id" class="px-1">
               {{ course.professor.name }} {{ course.professor.last_name }}
@@ -96,12 +100,12 @@
 <script setup>
   import { onMounted,ref } from 'vue'; 
   import { useAppStore } from '@/stores/useAppStore';
-  import { useTitleStore } from '@/stores/useTitleStore';
+  import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import { dateFormat } from '@/utils/dateFormat';
   import api from '@/plugins/axios';
 
   const app = useAppStore();
-  const titleStore = useTitleStore();
+  const pageThemeStore = usePageThemeStore();
   const endpointCertificate = import.meta.env.VITE_CERTIFICATES
   const endpointStatistics= import.meta.env.VITE_STATISTICS;
   const certificates = ref(null);
@@ -114,7 +118,7 @@
     'end_date':''
   })
 
-  titleStore.setColorTitle('Estadisticas', 'sky-900');
+  pageThemeStore.setPageTheme('Estadisticas', 'sky-900');
 
   //  Functions
   const searchData = async () => {
