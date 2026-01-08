@@ -74,47 +74,17 @@
   //
   const route = useRoute();
   const slug = route.params.slug;
-  
-  const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
-  const endpointModules = import.meta.env.VITE_MODULES;
-  const endpointGroups = import.meta.env.VITE_GROUPS;
-  const endpointReviews = import.meta.env.VITE_REVIEWS;
   const app = useAppStore(); 
   const pageThemeStore = usePageThemeStore();
-
   const modalAddGroup = ref(false);
   const modalEditGroup = ref(false);
-  const modalEditCourse = ref(false);
-  const modalFinishGroup = ref(false);
-  const modalReview = ref(false);
   const certificate = ref(null);
-  const course = ref(null);
-  const courseId = ref(null);
-  const reviewId = ref(null);
-  const groupId = ref(null);
   const success = ref(null);
   const error = ref(null);
   const modules = ref([]);
   const groups = ref([]);
-  const courseFlag = ref(0);
   const status = ref("");
   const code = ref("");
-  const formEdit = ref({
-    'certificate_id':'',
-    'code':'',
-    'status':''
-  })
-  const review = ref({
-    'course_id':'',
-    'study_plan':'',
-    'dates':'',
-    'users_in_group':'',
-    'exam':'',
-    'students':'',
-    'repeaters':'',
-    'visible':'',
-    'comments':'',
-  });
   // Watchers
   watch(() => certificate.value, (newVal) => {
     if (newVal.name && newVal.color) {
@@ -146,9 +116,11 @@
       form.value = {'all':true};
     }
     //
+    const endpointGroups = import.meta.env.VITE_GROUPS;
     const url = `${endpointGroups}/${certificate.value.id}/search`;
+    const body = form.value;
     try {
-      const response = await api.post(url, form.value);
+      const response = await api.post(url, body);
       groups.value = response.data;
       error.value = groups.value.length > 0 
         ? null 
@@ -162,23 +134,6 @@
     }
   };
 
-
-  const editReview = async () => {
-    setInitValues(1);
-    const url = `${endpointReviews}/${reviewId.value}`;
-    try {
-      const response = await api.put(url, review.value);
-      if (response.status == 200) {
-        success.value = response.data.message;
-      }
-    }
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al editar la revisión';
-    }
-    finally {
-      app.loadingApp = false;
-    }
-  }
   const setInitValues = (option) => {    
     app.loadingApp = option==1 ? true : false;
     error.value = null;
@@ -187,6 +142,7 @@
   //  Init functions
   const getCertificate = async () => {
     setInitValues(1);
+    const endpointCertificate = import.meta.env.VITE_CERTIFICATE;
     const url = `${endpointCertificate}/${slug}`;
     try {
       const response = await api.get(url);
@@ -201,6 +157,7 @@
   };
 
   const getModules = async () => {
+    const endpointModules = import.meta.env.VITE_MODULES;
     const url = `${endpointModules}/by-certificate/${certificate.value.id}`;
     try {
       const response = await api.get(url);

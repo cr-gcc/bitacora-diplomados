@@ -86,9 +86,6 @@
             placeholder="Escribe tu comentario aquí..."
           ></textarea>
         </div>
-        <div>
-          {{ form }} {{ courseId }}
-        </div>
       </div>
     </template>
     <template #options>
@@ -108,9 +105,10 @@
 <script setup>
   import { ref, computed, watch } from 'vue';
   import { usePageThemeStore } from '@/stores/usePageThemeStore';
+  import { parseBoolean, parseIntSafe } from '@/utils/casting';
   import BaseModal from '@/components/ui/BaseModal.vue';
   import api from '@/plugins/axios';
-
+  
   const pageThemeStore = usePageThemeStore();
   const reviewId = ref(null);
   const error = ref('');
@@ -132,8 +130,8 @@
       default: false,
     },
     review: {
-      type: Number,
-      default: 0,
+      type: Object,
+      default: () => ({}),
     },
   });
 
@@ -154,7 +152,15 @@
     ],  
     () => {
       if (props.modelValue) {
-        reviewId.value = props.review;
+        reviewId.value = props.review.id;
+        form.value.study_plan = parseBoolean(props.review.studyPlan);
+        form.value.dates = parseBoolean(props.review.dates);
+        form.value.users_in_group = parseBoolean(props.review.usersInGroup);
+        form.value.exam = props.review.exam;
+        form.value.students = parseIntSafe(props.review.students);
+        form.value.repeaters = parseIntSafe(props.review.repeaters);
+        form.value.visible = parseBoolean(props.review.visible);
+        form.value.comments = props.review.comments || '';
       }
     },
     { immediate: true }

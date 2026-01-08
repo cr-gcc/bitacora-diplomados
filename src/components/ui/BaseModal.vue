@@ -1,29 +1,35 @@
 <template>
-  <div v-if="modelValue" @click.self="handleBackdropClick" class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black opacity-70"></div>
-    <div :class="['relative bg-gray-300 rounded-lg shadow-xl w-full px-4 py-2 z-10', modalWidth]">
-      <div class="flex justify-between items-center mb-2">
-        <h2 :class="['text-2xl font-semibold', pageThemeStore.textColor]">{{ title }}</h2>
-      </div>
-      <div class="mb-1">
-        <slot name="body"/>
-        <div class="alerts">
-          <div v-if="error" class="mt-2 mb-1">
-            <p class="text-red-700">{{ error }}</p>
+  <Teleport to="body">
+    <div v-if="modelValue" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="fixed inset-0 bg-black/70 transition-opacity"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0" @click.self="handleBackdropClick">
+          <div :class="['relative transform overflow-hidden rounded-lg bg-gray-300 text-left shadow-xl transition-all w-full px-4 py-2 sm:my-8', modalWidth]">
+            <div class="flex justify-between items-center mb-2">
+              <h2 :class="['text-2xl font-semibold', pageThemeStore.textColor]">{{ title }}</h2>
+            </div>
+            <div class="mb-1">
+              <slot name="body"/>
+              <div class="alerts">
+                <div v-if="error" class="mt-2 mb-1">
+                  <p class="text-red-700">{{ error }}</p>
+                </div>
+                <div v-if="success" class="mt-2 mb-1">
+                  <p class="text-lime-700">{{ success }}</p>
+                </div>
+              </div>
+              <div class="flex justify-end gap-1">
+                <slot name="options"/>
+              </div>
+              <div v-if="loading" class="mt-2">
+                <PB/>  
+              </div>
+            </div>
           </div>
-          <div v-if="success" class="mt-2 mb-1">
-            <p class="text-lime-700">{{ success }}</p>
-          </div>
-        </div>
-        <div class="flex justify-end gap-1">
-          <slot name="options"/>
-        </div>
-        <div v-if="loading" class="mt-2">
-          <PB/>  
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>

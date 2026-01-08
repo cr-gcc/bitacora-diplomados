@@ -32,7 +32,7 @@
       <div class="px-2">
         <div class="flex justify-end gap-2 py-1">
           <button 
-            @click="openModal('delete', group.id)"
+            @click="openModal('delete', group)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -42,7 +42,7 @@
             Eliminar
           </button>
           <button 
-            @click="openModal('editGroup', group.id)"
+            @click="openModal('editGroup', group)"
             :class="[
               'bo-mini', 
               pageThemeStore.borderColor, 
@@ -93,21 +93,46 @@
               </td>
               <td class="py-1">
                 <button 
-                  @click="openModal('editCourse', course.id)"
+                  @click="openModal(
+                    'editCourse', 
+                    {
+                      'id':course.id,
+                      'startDate':course.start_date,
+                      'endDate':course.end_date,
+                      'professorId':course.professor_id,
+                    })"
                   :class="['bo-mini mb-1', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-pen mr-0.5"></i>
                   Editar
                 </button>
                 <button 
                   v-if = "course?.review"
-                  @click="openModal('reviewCourse', course.review.id)"
+                  @click="openModal(
+                    'reviewCourse', 
+                    {
+                      'id':course.review.id,
+                      'studyPlan':course.review.study_plan,
+                      'dates':course.review.dates,
+                      'usersInGroup':course.review.users_in_group,
+                      'exam':course.review.exam,
+                      'students':course.review.students,
+                      'repeaters':course.review.repeaters,
+                      'visible':course.review.visible,
+                      'comments':course.review.comments
+                    }
+                  )"
                   :class="['bo-mini', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-clipboard-check mr-0.5"></i>
                   Revisar
                 </button>
                 <button 
                   v-else
-                  @click="openModal('createReview', course.id)"
+                  @click="openModal(
+                    'createReview', 
+                    {
+                      'id':course.id,
+                    }
+                  )"
                   :class="['bo-mini', pageThemeStore.bgColor]">
                   <i class="fa-solid fa-calendar-plus mr-0.5"></i>
                   Cargar Revisión
@@ -130,7 +155,7 @@
     />
     <EditCourse 
       v-model="modalEditCourse"
-      :course="courseId"
+      :course="course"
       @refresh="refresh()"
     />
     <CreateReview 
@@ -140,7 +165,7 @@
     />
     <ReviewCourse 
       v-model="modalReviewCourse"
-      :review="reviewId"
+      :review="review"
       @refresh="refresh()"
     />
   </div>
@@ -164,7 +189,8 @@
   const modalReviewCourse = ref(false);
   const groupId = ref(null);
   const courseId = ref(null);
-  const reviewId = ref(null);
+  const course = ref(null);
+  const review = ref(null);
   const props = defineProps({
     groups: {
       type: Array,
@@ -174,25 +200,25 @@
 
   const emit = defineEmits(['refresh']);
 
-  const openModal = (modal, id) => {
+  const openModal = (modal, data) => {
     if (modal === 'editGroup') {
-      groupId.value = id;
+      groupId.value = data.id;
       modalEditGroup.value = true;
     }
     else if (modal === 'delete') {
-      groupId.value = id;
+      groupId.value = data.id;
       modalDeleteGroup.value = true;
     }
     else if (modal === 'editCourse') {
-      courseId.value = id;
+      course.value = data;
       modalEditCourse.value = true;
     }
     else if (modal === 'createReview') {
-      courseId.value = id;
+      courseId.value = data.id;
       modalCreateReview.value = true;
     }
     else if (modal === 'reviewCourse') {
-      reviewId.value = id;
+      review.value = data;
       modalReviewCourse.value = true;
     }
     else {

@@ -68,8 +68,8 @@
       default: false
     },
     course: {
-      type: Number,
-      default: 0
+      type: Object,
+      default: () => ({})
     }
   });
 
@@ -86,7 +86,10 @@
     ],
     () => {
       if (props.modelValue) {
-        courseId.value = props.course;
+        courseId.value = props.course.id;
+        form.value.start_date = props.course.startDate;
+        form.value.end_date = props.course.endDate;
+        form.value.professor_id = props.course.professorId;
       }
     },
     { immediate: true }
@@ -135,7 +138,7 @@
     }
   }
 
-  const closeModal = (option) => {
+  const closeModal = () => {
     isOpen.value = false;
     
     if (success.value) {
