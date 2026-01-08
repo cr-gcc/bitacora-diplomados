@@ -32,7 +32,7 @@
     </div>
     <div>
       <button
-        @click="addProfessor()" 
+        @click="openModal('add', 0)" 
         class="bcb-certificate border-sky-900 bg-sky-900">
         Agregar
       </button>
@@ -73,8 +73,8 @@
               <button 
                 class="bo-mini mb-1 bg-sky-900" 
                 @click="getProfessorInArray(prof.id)">
-                  <i class="fa-solid fa-address-card mr-1"></i>
-                Ver registro
+                  <i class="fa-solid fa-pen mr-0.5"></i>
+                Editar
               </button>
             </td>
           </tr> 
@@ -82,131 +82,45 @@
       </table>
     </div>
   </div>
-  <ModalOptions v-model="isModalOpen" title="Profesor">
-    <div v-if="professorFlag==1" class="grid-max-3 gap-4">
-      <div>
-        <span class="whitespace-nowrap">Nombre</span>
-        <input v-model="professor.name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Apellidos</span>
-        <input v-model="professor.last_name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Email</span>
-        <input v-model="professor.email" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">RFC</span>
-        <input v-model="professor.rfc" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Usuario</span>
-        <input v-model="professor.user" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Contraseña</span>
-        <input v-model="professor.password" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Estatus</span>
-        <select
-          v-model="professor.active"
-          name="status"
-          class="base-input-gray"
-        >
-          <option value="" disabled>Seleccione un estatus</option>
-          <option value="1">Activo</option>
-          <option value="0">Inactivo</option>
-        </select>
-      </div>
-    </div>
-    <div v-else class="grid-max-3 gap-4">
-      <div>
-        <span class="whitespace-nowrap">Nombre</span>
-        <input v-model="form.name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Apellidos</span>
-        <input v-model="form.last_name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Email</span>
-        <input v-model="form.email" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">RFC</span>
-        <input v-model="form.rfc" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Usuario</span>
-        <input v-model="form.user" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Contraseña</span>
-        <input v-model="form.password" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Estatus</span>
-        <select
-          v-model="form.active"
-          name="status"
-          class="base-input-gray"
-        >
-          <option value="" disabled>Seleccione un estatus</option>
-          <option value="1">Activo</option>
-          <option value="0">Inactivo</option>
-        </select>
-      </div>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="sendProfessor()" 
-        class="bcb-modal bg-sky-800">
-        {{ professorFlag==0 ? 'Guardar' : 'Editar' }}
-      </button>
-      <button 
-        @click="closeProfessor()"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
+  <Add 
+    v-model="openAddModal" 
+    @refresh="getAllProfessors()"
+  />
+  <Edit 
+    v-model="openEditModal" 
+    :professor="professor" 
+    @refresh="getAllProfessors()"
+  />
 </template>
 <script setup>
   import { ref } from 'vue'; 
   import { useAppStore } from '@/stores/useAppStore';
-  import { useTitleStore } from '@/stores/useTitleStore';
-  import ModalOptions from '@/components/ModalOptions.vue';
+  import { usePageThemeStore } from '@/stores/usePageThemeStore';
+  import Add from '@/components/modals/professor/Add.vue';
+  import Edit from '@/components/modals/professor/Edit.vue';
   import api from '@/plugins/axios';
 
   const endpoint = import.meta.env.VITE_PROFESSORS;
   const app = useAppStore();
-  const titleStore = useTitleStore();
-  const isModalOpen = ref(false);
+  const pageThemeStore = usePageThemeStore();
+  const openAddModal = ref(false);
+  const openEditModal = ref(false);
   const error = ref(null);
   const success  = ref(null);
-  const professorFlag = ref(0);
+  const professor = ref(null);
   const professors = ref([]);
-  const professor = ref();
   const info = ref("");
-  const form = ref({
-    'name':'',
-    'last_name':'',
-    'email':'',
-    'rfc':'',
-    'user':'',
-    'password':'',
-    'active':'',
-  });
 
-  titleStore.setColorTitle('Profesores', 'sky-900');
+  pageThemeStore.setPageTheme('Profesores', 'sky-900');
+
+  const openModal = (option, id) => {
+    if (option == 'add') {
+      openAddModal.value = true;
+    }
+    else if (option == 'edit') {
+      openEditModal.value = true;
+    }
+  };
 
   const getAllProfessors = async () => {
     setInitValues(1);
@@ -225,16 +139,14 @@
 
   const getProfessorInArray = async (id) => {
     professor.value = null;
-    professorFlag.value = 1;
     let selectedProfessor = professors.value.find(p => p.id === id);
     if (selectedProfessor) {
       professor.value = selectedProfessor;
-      isModalOpen.value = true;
+      openEditModal.value = true;
     } 
     else {
       getProfessor(id);
     }
-
   };
 
   const getProfessor = async (id) => {
@@ -283,37 +195,6 @@
       error.value = e.response?.data?.message || 'Error consultar el profesor';
     } finally {
       app.loadingApp = false;
-    }
-  };
-
-  const closeProfessor = () => {
-    setInitValues(0);
-    isModalOpen.value = false;
-    professor.value = null;
-  }
-
-  const addProfessor = () => {
-    professorFlag.value = 0;
-    isModalOpen.value = true;
-  };
-
-  const sendProfessor = async () => {
-    setInitValues(1);
-    const method = professorFlag.value === 0 ? 'post' : 'put';
-    const body = professorFlag.value === 0 ? form.value : professor.value;
-    const url = professorFlag.value === 0 ? endpoint : `${endpoint}/${professor.value.id}`;
-
-    try {
-      const response = await api[method](url, body);
-      if (response.status == 200) {
-        success.value = response.data.message+". Por favor consulte los profesores para verificar los cambios.";
-      }
-    } 
-    catch (e) {
-      error.value = e.response?.data?.message || 'Error al agregar el profesor.';
-    } 
-    finally {
-      app.loadingApp = false;    
     }
   };
 

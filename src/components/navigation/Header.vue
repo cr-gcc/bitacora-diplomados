@@ -20,7 +20,7 @@
                   Diplomados
                 </RouterLink>
               </li>
-              <!--<li>
+              <li>
                 <RouterLink :to="'/profesores'" class="text-gray-300 transition hover:text-white"
                 >
                   Profesores
@@ -32,7 +32,6 @@
                   Estadisticas
                 </RouterLink>
               </li>
-              -->
             </ul>
           </nav>
           <!-- Avatar y menú -->
