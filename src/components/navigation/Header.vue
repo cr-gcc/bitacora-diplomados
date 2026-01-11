@@ -147,6 +147,7 @@
   import Profile from '@/components/modals/user/Profile.vue';
   import api from '@/plugins/axios';
 
+  //  Variables
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
   const auth = useAuthStore();
   const app = useAppStore();

@@ -7,7 +7,8 @@ import Certificates from "@/views/Certificates.vue";
 import Certificate from "@/views/Certificate.vue";
 import Professors from "@/views/Professors.vue";
 import Statistics from "@/views/Statistics.vue";
-/*import Users from "@/views/Users.vue";
+import Users from "@/views/Users.vue";
+/*
 import ForgotPassword from "@/views/ForgotPassword.vue";
 import ResetPassword from "@/views/ResetPassword.vue";
 */
@@ -66,7 +67,6 @@ const routes = [
       requiresAuth: true,
     },
   },
-  /*
   {
     path: "/usuarios",
     component: Users,
@@ -74,7 +74,6 @@ const routes = [
       requiresAuth: true,
     },
   },
-  */
 ];
 
 const base = import.meta.env.VITE_BASE_URL || "/";

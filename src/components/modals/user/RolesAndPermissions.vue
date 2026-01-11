@@ -2,4 +2,3 @@
 </template>
 <script setup>
 </script>
-.
