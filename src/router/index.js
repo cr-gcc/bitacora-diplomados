@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 import Login from "@/views/Login.vue";
-import Home from "@/views/Home.vue";
+import Calendar from "@/views/Calendar.vue";
 import Certificates from "@/views/Certificates.vue";
 import Certificate from "@/views/Certificate.vue";
 import Professors from "@/views/Professors.vue";
@@ -32,7 +32,8 @@ const routes = [
   */
   {
     path: "/",
-    component: Home,
+    alias: "/calendario",
+    component: Calendar,
     meta: {
       requiresAuth: true,
     },

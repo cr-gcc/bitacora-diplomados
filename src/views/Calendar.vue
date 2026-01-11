@@ -24,7 +24,7 @@
   const error = ref(null);
   const date = ref(null);
   
-  pageThemeStore.setPageTheme('Home', 'sky-900');
+  pageThemeStore.setPageTheme('Calendario', 'sky-900');
 
   const openModal = ({ day, month, year }) => {
     scheaduleModal.value = true;
