@@ -9,9 +9,9 @@
           <nav aria-label="Global" class="hidden md:block">
             <ul class="flex items-center gap-6 text-md">
               <li>
-                <RouterLink :to="'/'" class="text-gray-300 transition hover:text-white"
+                <RouterLink :to="'/calendario'" class="text-gray-300 transition hover:text-white"
                 >
-                  Home
+                  Calendario
                 </RouterLink>
               </li>
               <li>
@@ -57,14 +57,13 @@
               <div class="p-2">
                 <div>
                   <button
-                    @click="openModalEdit()"
+                    @click="openModal()"
                     class="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"
                     role="menuitem"
                   >
                     Mi Perfil
                   </button>
                 </div>
-                <!--<div v-if="auth.user.roles[0].name == 'admin'">-->
                 <div v-if="auth.hasRole('admin')">
                   <RouterLink :to="'/usuarios'"
                     class="block rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -138,77 +137,28 @@
       </div>
     </div>
   </header>
-  <ModalOptions v-model="modalEdit" modalWidth="max-w-xl" title="Perfil">
-    <div class="grid-max-3 gap-4 mb-2">
-      <div>
-        <span class="whitespace-nowrap">Nombre</span>
-        <input v-model="formUser.name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Apellidos</span>
-        <input v-model="formUser.last_name" type="text" class="base-input-gray"/>
-      </div>
-      <div>
-        <span class="whitespace-nowrap">Email</span>
-        <input v-model="formUser.email" type="email" class="base-input-gray"/>
-      </div>
-    </div>
-    <div v-if="error" class="mt-2 mb-1">
-      <p class="text-red-700">{{ error }}</p>
-    </div>
-    <div v-if="success" class="mt-2 mb-1">
-      <p class="text-lime-700">{{ success }}</p>
-    </div>
-    <div class="flex justify-end gap-1">
-      <button 
-        @click="editUser()"
-        class="bcb-modal bg-sky-800">
-        Guardar
-      </button>
-      <button 
-        @click="closeModalEdit()"
-        class="bcb-modal bg-sky-800">
-        Salir
-      </button>
-    </div>
-  </ModalOptions>
+  <Profile v-model="modalProfileEdit" @refresh="refresh()"/>
 </template>
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '@/stores/useAuthStore';
   import { useAppStore } from "@/stores/useAppStore";
-  import ModalOptions from '@/components/ModalOptions.vue';
+  import Profile from '@/components/modals/user/Profile.vue';
   import api from '@/plugins/axios';
 
   const logoPath = 'https://thor.fca.unam.mx/cedigec/cedigec/assets/img/logos/cedigec_s_trans.png';
-  const endpoint = import.meta.env.VITE_PROFILES;
   const auth = useAuthStore();
   const app = useAppStore();
   const router = useRouter();
   const userMenu = ref(false);
-  const modalEdit = ref(false);
+  const modalProfileEdit = ref(false);
   const mobileUserMenu = ref(false);
-  const success = ref(null);
-  const error = ref(null);
   const userMenuRef = ref(null);
-  const userId = ref(null);
-  const mobileUserMenuRef = ref(null);
-  const formUser = ref({
-    'name':'',
-    'last_name':'',
-    'email':''
-  });
 
   //  Functions
   const toggleUserMenu = () => {
     userMenu.value = !userMenu.value;
-  };
-  const toggleMobileUserMenu = () => {
-    mobileUserMenu.value = !mobileUserMenu.value;
-  };
-  const closeUserMenu = () => {
-    userMenu.value = false;
   };
   const closeMobileUserMenu = () => {
     mobileUserMenu.value = false;
@@ -225,58 +175,9 @@
       userMenu.value = false;
     }
   };
-  const openModalEdit = async () => {
-    app.loadingApp = true;
-    const url = '/me';
-    try {
-      const response = await api.get(url);
-      if (response.status == 200) {
-        userId.value = response.data.id;
-        formUser.value.name = response.data.name;
-        formUser.value.last_name = response.data.last_name;
-        formUser.value.email = response.data.email;
-        modalEdit.value = true;
-      }
-      else {
-        alert("No se pudo consultar el perfil del usuario. Intentelo más tarde.");
-      }
-    } 
-    catch (e) {
-      alert("Error al consultar el perfil del usuario.");
-    } 
-    finally {
-      app.loadingApp = false;
-    }
-  }
-  const editUser = async () => {
-    app.loadingApp = true;
-    const url = `${endpoint}/${userId.value}`;
-    try {
-      const response = await api.put(url, formUser.value);
-      if (response.status == 200) {
-        success.value = response.data.message;
-      }
-      else {
-        error.value = "Error al actualizar el perfil del usuario.";
-      }
-    }
-    catch (e) {
-      error.value = e.response?.data?.message ||
-      'Ha ocurrido un error en el sistema. por favor intentelo más tarde.';
-    } 
-    finally {
-      app.loadingApp = false;
-    }
-  }
-  const closeModalEdit = () => {
-    modalEdit.value = false;
-    userId.value = null;
-    success.value = null;
-    error.value = null;
-    formUser.value.name = '';
-    formUser.value.last_name = '';
-    formUser.value.email = '';
-  }
+  const openModal = () => {
+    modalProfileEdit.value = true;
+  };
   const logout = async () => {
     try {
       app.loadingApp = true;
@@ -290,7 +191,10 @@
       auth.logout();
       router.push('/login');
     }
-  }
+  };
+  const refresh = () => {
+    window.location.reload();
+  };
   
   //  Hooks
   onMounted(() => {
@@ -299,5 +203,4 @@
   onBeforeUnmount(() => {
     document.removeEventListener("click", handleClick);
   });
-  
 </script>
