@@ -8,9 +8,8 @@
     :loading="loading"  
   >
     <template #body>
-      <div>
+      <div class="mb-2">
         <p>¿Esta seguro de resetear la contraseña a este usuario?</p>
-        <p>{{ $props.user }}</p>
       </div>
     </template>
     <template #options>

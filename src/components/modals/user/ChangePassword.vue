@@ -1,36 +1,36 @@
 <template>
   <BaseModal
     v-model="isOpen"
-    modalWidth="max-w-xl"
-    title="Mi Perfil"
+    modalWidth="max-w-sm"
+    title="Cambio de Contraseña"
     :error="error"
     :success="success"
-    :loading="loading"  
+    :loading="loading"
   >
     <template #body>
-      <div class="grid-max-3 gap-4 mb-2">
+      <div class="mb-2">
         <div>
-          <span class="whitespace-nowrap">Nombre</span>
-          <input v-model="form.name" type="text" class="base-input-gray"/>
+          <span class="whitespace-nowrap">Contraseña</span>
+          <input v-model="form.password" type="password" class="base-input-gray"/>  
         </div>
         <div>
-          <span class="whitespace-nowrap">Apellidos</span>
-          <input v-model="form.last_name" type="text" class="base-input-gray"/>
-        </div>
-        <div>
-          <span class="whitespace-nowrap">Email</span>
-          <input v-model="form.email" type="email" class="base-input-gray"/>
+          <span class="whitespace-nowrap">Confirmar Contraseña</span>
+          <input v-model="form.password_confirmation" type="password" class="base-input-gray"/>
         </div>
       </div>
     </template>
     <template #options>
       <button 
-        @click="editUser()"
+        v-if="!success"
+        @click="changePassword()"
+        :disabled="loading"
         class="bcb-modal bg-sky-800">
         Guardar
       </button>
       <button 
+        v-if="!forced || success"
         @click="closeModal()"
+        :disabled="loading"
         class="bcb-modal bg-sky-800">
         Salir
       </button>
@@ -48,61 +48,68 @@
   const success = ref('');
   const loading = ref(false);
   const form = ref({
-    name: auth.user?.name || '',
-    last_name: auth.user?.last_name || '',
-    email: auth.user?.email || ''
+    password: '',
+    password_confirmation: ''
   });
   const props = defineProps({
     modelValue: {
       type: Boolean,
       default: false
     },
-
+    forced: {
+      type: Boolean,
+      default: false
+    }
   });
 
-  const emit = defineEmits(['update:modelValue', 'refresh']);
+  const emit = defineEmits(['update:modelValue', 'confirm']);
 
   const isOpen = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
   });
 
-  const editUser = async () => {
-    loading.value = true;
+  const changePassword = async () => {
     error.value = null;
     success.value = null;
     //
-    const urlProfile = import.meta.env.VITE_PROFILES;
-    if (!auth.user) {
-      error.value = 'Sesión expirada.';
-      loading.value = false;
+    if (form.value.password !== form.value.password_confirmation) {
+      error.value = "Las contraseñas no coinciden.";
       return;
     }
-    const url = `${urlProfile}/${auth.user.id}`;
-    const body = form.value;
+    if (form.value.password.length < 8) {
+      error.value = "La contraseña debe tener al menos 8 caracteres.";
+      return;
+    } 
+    loading.value = true;
     //
+    const urlPassword = import.meta.env.VITE_PASSWORD;
+    const url = `${urlPassword}/change`;
+    const body = form.value;
     try {
-      const response = await api.put(url, body);
+      const response = await api.post(url, body);
       if (response.status === 200) {
         success.value = response.data.message;
       }
       else {
         error.value = response.data.message;
       }
+      
     } 
     catch (e) {
-      error.value = e.response?.data?.message || 'Error al guardar el usuario.';
+      error.value = e.response?.data?.error || 'Error al cambiar la contraseña.';
     } 
     finally {
       loading.value = false;
     }
   };
 
-  const closeModal = () => {
+  const closeModal = async () => {
     isOpen.value = false;
 
     if (success.value) {
-      emit('refresh');
+      await auth.fetchUser();
+      emit('confirm');
     }
 
     error.value = '';
