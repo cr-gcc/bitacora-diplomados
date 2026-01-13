@@ -51,24 +51,6 @@
                 </button>
               </div>
             </td>
-            <!--
-              <td class="px-1 pt-1">
-                <div class="flex flex-col items-center">
-                  <button 
-                    @click="openModalRoles(index)"
-                    class="bo-mini mb-1 bg-sky-900">
-                    <i class="fa-solid fa-users-gear mr-0.5"></i>
-                    Roles
-                  </button>
-                <button 
-                  @click="openModalPermissions(index)"
-                  class="bo-mini mb-1 bg-sky-900">
-                  <i class="fa-solid fa-list-check mr-0.5"></i>
-                  Permisos
-                </button>
-                </div>
-              </td>
-            -->
           </tr>
         </tbody>
       </table>
@@ -115,6 +97,7 @@
         isOpenAddModal.value = true;
         break;
       case 'edit':
+        user.value = data;
         isOpenEditModal.value = true;
         break;
       case 'reset-password':
