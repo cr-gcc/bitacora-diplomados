@@ -2,12 +2,6 @@
   <div class="bg-gray-300 px-4 py-2">
     <div class="my-1">
       <div class="flex gap-2 items-center justify-end">
-        <button
-          @click="openModal('roles-and-permissions', null)"
-          class="bo-mini mb-1 bg-sky-900">
-          <i class="fa-solid fa-users-gear mr-0.5"></i>
-          Roles y Permisos
-        </button> 
         <button 
           @click="openModal('add', null)"
           class="bo-mini mb-1 bg-sky-900">
@@ -24,7 +18,6 @@
             <th class="px-1">Nombre</th>
             <th class="px-1">Apellidos</th>
             <th class="px-1">Email</th>
-            <th class="px-1">Contraseña</th>
             <th class="px-1">Opciones</th>
           </tr>
         </thead>
@@ -34,7 +27,6 @@
             <td class="px-1 pt-1">{{ user.name }}</td>
             <td class="px-1 pt-1">{{ user.last_name }}</td>
             <td class="px-1 pt-1">{{ user.email }}</td>
-            <td class="px-1 pt-1">**********</td>
             <td class="px-1 pt-1">
               <div class="flex justify-center items-center gap-2">
                 <button
@@ -56,10 +48,15 @@
       </table>
     </div>
   </div>
-  <Add v-model="isOpenAddModal" @refresh="getUsers()"/>
+  <Add 
+    v-model="isOpenAddModal" 
+    :roles="roles" 
+    @refresh="getUsers()"
+  />
   <Edit 
     v-model="isOpenEditModal"
     :user="user"
+    :roles="roles"
     @refresh="getUsers()"
   />
   <ResetPassword 
@@ -67,14 +64,12 @@
     :user="user" 
     @refresh="getUsers()"
   />
-  <RolesAndPermissions v-model="isOpenRolesAndPermissionsModal"/>
 </template>
 <script setup>
   import { ref, onMounted } from 'vue';
   import { useAppStore } from '@/stores/useAppStore';
   import { usePageThemeStore } from '@/stores/usePageThemeStore';
   import Add from '@/components/modals/user/Add.vue';
-  import RolesAndPermissions from '@/components/modals/user/RolesAndPermissions.vue';
   import Edit from '@/components/modals/user/Edit.vue';
   import ResetPassword from '@/components/modals/user/ResetPassword.vue';
   import api from '@/plugins/axios';
@@ -85,6 +80,7 @@
   const isOpenEditModal = ref(false);
   const isOpenResetPasswordModal = ref(false);
   const isOpenRolesAndPermissionsModal = ref(false);
+  const roles = ref([]);
   const users = ref([]);
   const user = ref({});
   const error = ref('');
@@ -133,8 +129,23 @@
       app.loadingApp = false;
     }
   };
+  const getRoles = async () => {
+    const url = import.meta.env.VITE_ROLES;
+    try {
+      const response = await api.get(url);
+      if (response.status === 200) {
+        roles.value = response.data;
+      }
+      else {
+        error.value = response.data.message;
+      }
+    } catch (e) {
+      error.value = e.response?.data?.message || 'Error al obtener los roles.';
+    }
+  };
   //  Hooks
   onMounted(async () => {
     await getUsers();
+    await getRoles();
   });
 </script>

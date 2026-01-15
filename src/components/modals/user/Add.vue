@@ -25,7 +25,7 @@
           <span class="whitespace-nowrap">Rol</span>
           <select v-model="form.role_id" class="base-input-gray">
             <option value="" disabled selected>Selecciona un rol</option>
-            <option v-for="role in roles" :key="role.id" :value="role.id">
+            <option v-for="role in props.roles" :key="role.id" :value="role.id">
               {{ role.name }}
             </option>
           </select>
@@ -56,7 +56,6 @@
   const success = ref(null);
   const error = ref(null);
   const loading = ref(false);
-  const roles = ref([]);
   const form = ref({
     name: '',
     last_name: '',
@@ -68,6 +67,10 @@
     modelValue: {
       type: Boolean,
       default: false,
+    },
+    roles: {
+      type: Array,
+      default: () => [],
     },
   });
 
@@ -115,29 +118,5 @@
     form.value.email = '';
     form.value.role_id = '';
   };
-
-  const getRoles = async () => {
-    loading.value = true;
-    error.value = '';
-    success.value = '';
-    //
-    const url = import.meta.env.VITE_ROLES;
-    try {
-      const response = await api.get(url);
-      if (response.status === 200) {
-        roles.value = response.data;
-      }
-      else {
-        error.value = response.data.message;
-      }
-    } catch (e) {
-      error.value = e.response?.data?.message || 'Error al obtener los roles.';
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  onMounted(() => {
-    getRoles();
-  });
+  
 </script>
